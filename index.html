@@ -20,7 +20,6 @@
         html[dir="ltr"] .lang-ar { display: none; }
         ::-webkit-scrollbar { width: 0px; background: transparent; }
         
-        /* الوضع الداكن والفاتح */
         html.dark body { background-color: #0B1528; color: #f1f5f9; }
         html.dark .glass-card { background: #0F1E36; border: 1px solid #1E2E4A; }
         
@@ -40,19 +39,17 @@
                     <div class="text-[11px] font-bold flex items-center gap-1 mt-0.5">
                         <span class="text-[#FBB03B] lang-ar">مصنع تهامة |</span>
                         <span class="text-[#FBB03B] lang-en">Tahama Plant |</span>
-                        <span class="text-slate-400 dark:text-slate-400 lang-ar">نظام التحميل الآلي</span>
-                        <span class="text-slate-400 dark:text-slate-400 lang-en">Auto Loader System</span>
+                        <span class="text-slate-400 lang-ar">نظام التحميل الآلي</span>
+                        <span class="text-slate-400 lang-en">Auto Loader System</span>
                     </div>
                 </div>
             </div>
             
-            <!-- أزرار التحكم العلوية (اللغة، الوضع الليلي، الساعة) -->
             <div class="flex items-center gap-2">
                 <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-800 dark:bg-slate-900 border border-slate-700 dark:border-slate-800 rounded-xl text-slate-200 dark:text-slate-300 font-mono text-[11px]">
                     <i class="fa-regular fa-clock text-[#FBB03B]"></i>
                     <span id="live-time">00:00:00</span>
                 </div>
-                <!-- زر الوضع الليلي والنهاري -->
                 <button onclick="toggleTheme()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 px-3 py-1 rounded-xl text-xs font-bold border border-slate-700 transition" title="تبديل الوضع الليلي والنهاري">
                     <i id="theme-icon" class="fa-solid fa-moon"></i>
                 </button>
@@ -218,9 +215,8 @@
         </div>
     </nav>
 
-    <!-- الأكواد البرمجية -->
+    <!-- الأكواد البرمجية الشاملة -->
     <script>
-        // نظام الوضع الليلي والنهاري
         function toggleTheme() {
             const htmlTag = document.getElementById('html-root');
             const icon = document.getElementById('theme-icon');
@@ -235,7 +231,6 @@
             }
         }
 
-        // استرجاع الوضع المحفوظ عند التحميل
         (function() {
             const savedTheme = localStorage.getItem('spcc_theme');
             const htmlTag = document.getElementById('html-root');
@@ -281,7 +276,7 @@
         let savedKpi = localStorage.getItem('spcc_kpi');
 
         let loadersData = savedLoaders ? JSON.parse(savedLoaders) : Array.from({length: 8}, (_, i) => ({
-            id: i + 1, name: `Tahama-Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
+            id: i + 1, name: `Tahama-Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null, driverName: '', driverPhone: ''
         }));
 
         let completedRecordsList = savedRecords ? JSON.parse(savedRecords) : [];
@@ -309,17 +304,19 @@
                                 <span class="font-bold text-sm dark:text-white text-slate-800">${ldr.name}</span>
                             </div>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40">
-                                ${isAr ? 'قيد التحميل' : 'IN PROGRESS'}
+                                ${ldr.type}
                             </span>
                         </div>
-                        <div class="p-3 flex-1 space-y-2">
-                            <div class="flex justify-between items-center">
-                                <div class="font-mono font-black text-base dark:text-white text-slate-900">${ldr.plate}</div>
-                                <span class="text-[11px] font-bold px-2 py-1 rounded-lg border bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">${ldr.type}</span>
+                        <div class="p-3 flex-1 space-y-2 text-xs">
+                            <div class="flex justify-between items-center bg-slate-100 dark:bg-[#0B1528] p-2 rounded-xl">
+                                <span class="text-slate-500 dark:text-slate-400">${isAr ? 'رقم البوليصة:' : 'Order:'}</span>
+                                <span class="font-mono font-black text-sm dark:text-white text-slate-900">${ldr.plate}</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-1.5 bg-slate-100 dark:bg-[#0B1528] p-2 rounded-xl text-xs">
-                                <div><span class="text-slate-500 dark:text-slate-400 block text-[10px]">${isAr ? 'الأكياس' : 'Bags'}</span><span class="font-bold dark:text-white text-slate-800">${ldr.bags}</span></div>
-                                <div><span class="text-slate-500 dark:text-slate-400 block text-[10px]">${isAr ? 'وقت البدء' : 'In Time'}</span><span class="font-mono dark:text-slate-200 text-slate-700">${ldr.startTime}</span></div>
+                            <div class="space-y-1 px-1">
+                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'السائق:' : 'Driver:'}</span><span class="font-bold dark:text-slate-200 text-slate-800">${ldr.driverName || 'نصار علي'}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'الهاتف:' : 'Phone:'}</span><span class="font-mono dark:text-slate-300 text-slate-700">${ldr.driverPhone || '+966508935015'}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'الكمية:' : 'Quantity:'}</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">${ldr.bags} كيس (${(ldr.bags*0.05).toFixed(1)} MT)</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'وقت البدء:' : 'In Time:'}</span><span class="font-mono dark:text-slate-200 text-slate-700">${ldr.startTime}</span></div>
                             </div>
                         </div>
                         <div class="p-2 border-t border-slate-200 dark:border-[#1E2E4A] grid grid-cols-2 gap-2">
@@ -346,7 +343,7 @@
                         </div>
                         <div class="p-2 border-t border-slate-200 dark:border-[#1E2E4A]">
                             <button onclick="startLoader(${ldr.id})" class="w-full py-2 bg-slate-100 dark:bg-[#132847] hover:bg-slate-200 dark:hover:bg-[#1a345b] dark:text-slate-200 text-slate-800 border border-slate-300 dark:border-[#233d66] text-xs font-semibold rounded-xl transition">
-                                <i class="fa-solid fa-keyboard text-emerald-500"></i> ${isAr ? 'إدخال اللوحة يدوياً' : 'MANUAL START'}
+                                <i class="fa-solid fa-keyboard text-emerald-500"></i> ${isAr ? 'إدخال يدوياً' : 'MANUAL START'}
                             </button>
                         </div>
                     </div>`;
@@ -366,7 +363,7 @@
                 listContainer.innerHTML = `
                 <div class="glass-card p-6 rounded-2xl text-center">
                     <i class="fa-solid fa-folder-open text-4xl text-slate-400 dark:text-slate-600 mb-3"></i>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm">${isAr ? 'لا توجد سجلات حالياً. قم بإنهاء تحميل شاحنة لتظهر هنا.' : 'No records yet. End a load to see it here.'}</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">${isAr ? 'لا توجد سجلات حالياً.' : 'No records yet.'}</p>
                 </div>`;
                 return;
             }
@@ -374,16 +371,18 @@
             let html = '';
             [...completedRecordsList].reverse().forEach(rec => {
                 html += `
-                <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2">
+                <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2 text-xs">
                     <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700/50 pb-2">
-                        <span class="font-bold text-base dark:text-white text-slate-900 tracking-wider">${rec.plate}</span>
-                        <span class="text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded">Tahama-Bay ${rec.loaderId}</span>
+                        <span class="font-bold text-sm dark:text-white text-slate-900">${rec.plate} (${rec.type})</span>
+                        <span class="font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">Tahama-Bay ${rec.loaderId}</span>
                     </div>
-                    <div class="grid grid-cols-2 text-xs text-slate-500 dark:text-slate-400 gap-y-2 pt-1">
-                        <div>${isAr ? 'المشغل:' : 'Op:'} <span class="dark:text-white text-slate-800 font-semibold">${rec.operator}</span></div>
-                        <div>${isAr ? 'الكمية:' : 'Qty:'} <span class="text-emerald-600 dark:text-emerald-400 font-bold">${rec.bags} ${isAr ? 'كيس' : 'Bags'} (${rec.tons} MT)</span></div>
-                        <div>${isAr ? 'وقت البدء:' : 'In:'} <span class="dark:text-white text-slate-800 font-mono">${rec.startTime}</span></div>
-                        <div>${isAr ? 'وقت الانتهاء:' : 'Out:'} <span class="text-amber-600 dark:text-amber-400 font-mono">${rec.endTime}</span></div>
+                    <div class="grid grid-cols-2 gap-y-1.5 text-slate-600 dark:text-slate-300">
+                        <div>${isAr ? 'السائق:' : 'Driver:'} <strong class="dark:text-white text-slate-900">${rec.driverName}</strong></div>
+                        <div>${isAr ? 'الهاتف:' : 'Phone:'} <strong class="font-mono">${rec.driverPhone}</strong></div>
+                        <div>${isAr ? 'الكمية:' : 'Qty:'} <strong class="text-emerald-600 dark:text-emerald-400">${rec.bags} كيس (${rec.tons} MT)</strong></div>
+                        <div>${isAr ? 'المشغل:' : 'Op:'} <strong class="dark:text-white text-slate-900">${rec.operator}</strong></div>
+                        <div>${isAr ? 'البدء:' : 'In:'} <span class="font-mono">${rec.startTime}</span></div>
+                        <div>${isAr ? 'الانتهاء:' : 'Out:'} <span class="font-mono text-amber-600 dark:text-amber-400">${rec.endTime}</span></div>
                     </div>
                 </div>`;
             });
@@ -394,10 +393,10 @@
             if (completedRecordsList.length === 0) { alert("لا توجد سجلات مكتملة لإرسالها!"); return; }
             let targetEmails = "admin@spcc.com.sa,packhouse@spcc.com.sa";
             let date = new Date().toISOString().split('T')[0];
-            let subject = encodeURIComponent(`تقرير الشحنات المكتملة - مصنع تهامة (${date})`);
+            let subject = encodeURIComponent(`تقرير الشحنات - مصنع تهامة (${date})`);
             let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
             completedRecordsList.forEach((rec, index) => {
-                bodyText += `${index + 1}. الرافعة: Tahama-Bay ${rec.loaderId} | بوليصة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
+                bodyText += `${index + 1}. الرافعة: Tahama-Bay ${rec.loaderId} | البوليصة: ${rec.plate} | السائق: ${rec.driverName} (${rec.driverPhone}) | النوع: ${rec.type} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
             });
             bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
             window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
@@ -408,7 +407,7 @@
 
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
-                let manualData = prompt("أدخل رقم بوليصة الشحن (مثل DW25KQ):", "DW25KQ");
+                let manualData = prompt("أدخل رقم البوليصة:", "DW25KQ");
                 if (manualData) askForLoaderAndStart(manualData);
                 return;
             }
@@ -444,14 +443,12 @@
             if (matchPlate) plate = matchPlate[1];
             else if (decodedText.length > 2) plate = decodedText.substring(0, 10).trim();
 
-            let input = prompt(`📷 تم مسح الباركود بنجاح!\nبوليصة الشحن: ${plate}\n\n👉 أين تريد توجيه الشاحنة؟\nالرجاء إدخال رقم الرافعة (من 1 إلى 8):`, "3");
-
+            let input = prompt(`📷 تم مسح الباركود بنجاح!\nالبوليصة: ${plate}\n\n👉 أدخل رقم الرافعة المطلوب (من 1 إلى 8):`, "3");
             if (input === null) return;
 
             let targetId = parseInt(input.trim());
-
             if (isNaN(targetId) || targetId < 1 || targetId > 8) {
-                alert("❌ رقم غير صحيح. يرجى إدخال رقم بين 1 و 8 فقط.");
+                alert("❌ رقم غير صحيح. يجب إدخال رقم بين 1 و 8.");
                 return;
             }
 
@@ -463,15 +460,15 @@
 
             targetLoader.isActive = true;
             targetLoader.plate = plate.toUpperCase();
+            targetLoader.type = "PAPER BAG CEMENT";
+            targetLoader.bags = 600;
+            targetLoader.driverName = "نصار علي";
+            targetLoader.driverPhone = "+966508935015";
             targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
-
-            let bagsMatch = decodedText.match(/([0-9]{3,4})\s*bags?/i);
-            if (bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
-            else targetLoader.bags = 600;
 
             saveDataToStorage();
             renderLoaders();
-            alert(`✅ تم توجيه الشاحنة بنجاح إلى Tahama-Bay ${targetId}!`);
+            alert(`✅ تم توجيه البوليصة ${targetLoader.plate} إلى Tahama-Bay ${targetId}!`);
         }
 
         function startLoader(id) {
@@ -480,6 +477,10 @@
             if (p) {
                 ldr.isActive = true;
                 ldr.plate = p.toUpperCase();
+                ldr.type = "PAPER BAG CEMENT";
+                ldr.bags = 600;
+                ldr.driverName = "نصار علي";
+                ldr.driverPhone = "+966508935015";
                 ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
                 saveDataToStorage();
                 renderLoaders();
@@ -487,7 +488,7 @@
         }
 
         function cancelLoader(id) {
-            if (confirm(`هل أنت متأكد من إلغاء تحميل الشاحنة في Tahama-Bay ${id}؟`)) {
+            if (confirm(`هل أنت متأكد من إلغاء تحميل الرافعة Tahama-Bay ${id}؟`)) {
                 const ldr = loadersData.find(l => l.id === id);
                 ldr.isActive = false;
                 ldr.plate = '';
@@ -504,8 +505,16 @@
             const currentTons = +(ldr.bags * 0.05).toFixed(2);
 
             completedRecordsList.push({
-                loaderId: ldr.id, plate: ldr.plate, bags: ldr.bags, tons: currentTons,
-                startTime: ldr.startTime, endTime: endTime, operator: operatorName
+                loaderId: ldr.id, 
+                plate: ldr.plate, 
+                bags: ldr.bags, 
+                tons: currentTons,
+                type: ldr.type,
+                driverName: ldr.driverName,
+                driverPhone: ldr.driverPhone,
+                startTime: ldr.startTime, 
+                endTime: endTime, 
+                operator: operatorName
             });
 
             ldr.isActive = false;
