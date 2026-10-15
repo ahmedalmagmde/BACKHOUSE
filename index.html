@@ -347,8 +347,8 @@
 
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
-                let manualData = prompt("أدخل رقم بوليصة الشحن (مثال: DW25KQ):", "DW25KQ");
-                if (manualData) processScanData(manualData, 1);
+                let manualData = prompt("أدخل رقم الرافعة (من 1 إلى 8):", "3");
+                if (manualData) processScanData(manualData);
                 return;
             }
 
@@ -362,12 +362,11 @@
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 function onScanSuccess(decodedText) {
                     closeQRCamera();
-                    // عند مسح الرمز، نقوم بتشغيل أول رافعة فارغة فوراً وبكل سلاسة بدون أي إزعاج
                     processScanData(decodedText);
                 },
                 function onScanFailure(error) {}
             ).then(() => { isCameraActive = true; }).catch((err) => {
-                document.getElementById('camera-error').classList.remove('hidden');
+                document.getElementById('camera-error').classList.add('hidden');
             });
         }
 
@@ -378,13 +377,24 @@
             }
         }
 
-        // التوجيه الذكي المباشر بدون إظهار نوافذ معلقة
+        // قراءة الرقم مباشرة من الباركود وتوجيهه للرافعة الصحيحة (مثلاً 8 تذهب للرافعة 8)
         function processScanData(decodedText) {
             let plate = decodedText.split(/[\n\r|,-]/)[0].trim() || "DW25KQ";
+            let targetId = 1; // الافتراضي
+
+            // البحث عن أي رقم صريح من 1 إلى 8 داخل نص الباركود
+            let matchNum = decodedText.match(/([1-8])/);
+            if (matchNum) {
+                targetId = parseInt(matchNum[1]);
+            }
+
+            let targetLoader = loadersData.find(l => l.id === targetId);
             
-            // البحث عن أول رافعة فارغة (IDLE) لتشغيلها تلقائياً وسريعاً
-            let targetLoader = loadersData.find(l => !l.isActive);
-            
+            if (!targetLoader || targetLoader.isActive) {
+                // إذا كانت الرافعة المطلوبة مشغولة، ابحث عن أول رافعة فارغة
+                targetLoader = loadersData.find(l => !l.isActive);
+            }
+
             if (!targetLoader) {
                 alert("⚠️ جميع الرافعات الـ 8 مشغولة حالياً!");
                 return;
