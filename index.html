@@ -203,7 +203,7 @@
         </div>
     </nav>
 
-    <!-- الأكواد البرمجية -->
+    <!-- الأكواد البرمجية مع الحفظ الدائم (LocalStorage) -->
     <script>
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => { el.classList.remove('block'); el.classList.add('hidden'); });
@@ -232,11 +232,24 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-        let loadersData = Array.from({length: 8}, (_, i) => ({
+        // استرجاع البيانات من الذاكرة الدائمة (LocalStorage) إن وجدت
+        let savedLoaders = localStorage.getItem('spcc_loaders');
+        let savedRecords = localStorage.getItem('spcc_records');
+        let savedKpi = localStorage.getItem('spcc_kpi');
+
+        let loadersData = savedLoaders ? JSON.parse(savedLoaders) : Array.from({length: 8}, (_, i) => ({
             id: i + 1, name: `Tahama-Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
         }));
-        let kpi = { completed: 0, bags: 0, tons: 0 };
-        let completedRecordsList = [];
+
+        let completedRecordsList = savedRecords ? JSON.parse(savedRecords) : [];
+        let kpi = savedKpi ? JSON.parse(savedKpi) : { completed: 0, bags: 0, tons: 0 };
+
+        // دالة حفظ البيانات في ذاكرة المتصفح الدائمة
+        function saveDataToStorage() {
+            localStorage.setItem('spcc_loaders', JSON.stringify(loadersData));
+            localStorage.setItem('spcc_records', JSON.stringify(completedRecordsList));
+            localStorage.setItem('spcc_kpi', JSON.stringify(kpi));
+        }
 
         function renderLoaders() {
             const container = document.getElementById('loaders-container');
@@ -267,9 +280,12 @@
                                 <div><span class="text-slate-400 block text-[10px]">${isAr ? 'وقت البدء' : 'In Time'}</span><span class="font-mono text-slate-200">${ldr.startTime}</span></div>
                             </div>
                         </div>
-                        <div class="p-2 border-t border-[#1E2E4A]">
-                            <button onclick="stopLoader(${ldr.id})" class="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition">
-                                <i class="fa-solid fa-check-circle"></i> ${isAr ? 'إنهاء التحميل' : 'END LOADING'}
+                        <div class="p-2 border-t border-[#1E2E4A] grid grid-cols-2 gap-2">
+                            <button onclick="cancelLoader(${ldr.id})" class="py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-xs rounded-xl transition">
+                                <i class="fa-solid fa-ban"></i> ${isAr ? 'إلغاء' : 'Cancel'}
+                            </button>
+                            <button onclick="stopLoader(${ldr.id})" class="py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition">
+                                <i class="fa-solid fa-check-circle"></i> ${isAr ? 'إنهاء' : 'End'}
                             </button>
                         </div>
                     </div>` : `
@@ -295,6 +311,9 @@
                 container.innerHTML += cardHTML;
             });
             document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
+            document.getElementById('kpi-completed').innerText = kpi.completed;
+            document.getElementById('kpi-bags').innerText = kpi.bags;
+            document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-400 font-normal">MT</span>`;
         }
 
         function renderRecordsTable() {
@@ -377,17 +396,15 @@
             }
         }
 
-        // نافذة التأكيد السريعة لتحديد رقم الرافعة الصحيح (من 1 إلى 8) عند مسح أي باركود
         function askForLoaderAndStart(decodedText) {
             let plate = "DW25KQ";
             let matchPlate = decodedText.match(/([A-Z0-9]{5,8})/);
             if (matchPlate) plate = matchPlate[1];
             else if (decodedText.length > 2) plate = decodedText.substring(0, 10).trim();
 
-            // نافذة تسأل المشغل عن رقم الرافعة وتفتح لوحة المفاتيح لتكتبه (مثلاً 8)
             let input = prompt(`📷 تم مسح الباركود بنجاح!\nبوليصة الشحن: ${plate}\n\n👉 أين تريد توجيه الشاحنة؟\nالرجاء إدخال رقم الرافعة (من 1 إلى 8):`, "3");
 
-            if (input === null) return; // إذا ضغط إلغاء
+            if (input === null) return;
 
             let targetId = parseInt(input.trim());
 
@@ -410,6 +427,7 @@
             if (bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
             else targetLoader.bags = 600;
 
+            saveDataToStorage();
             renderLoaders();
             alert(`✅ تم توجيه الشاحنة بنجاح إلى Tahama-Bay ${targetId}!`);
         }
@@ -421,6 +439,19 @@
                 ldr.isActive = true;
                 ldr.plate = p.toUpperCase();
                 ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+                saveDataToStorage();
+                renderLoaders();
+            }
+        }
+
+        // --- زر إلغاء التحميل (لتفريغ الرافعة وإعادتها لحالة جاهز بدون تسجيل) ---
+        function cancelLoader(id) {
+            if (confirm(`هل أنت متأكد من إلغاء تحميل الشاحنة في Tahama-Bay ${id}؟`)) {
+                const ldr = loadersData.find(l => l.id === id);
+                ldr.isActive = false;
+                ldr.plate = '';
+                ldr.startTime = null;
+                saveDataToStorage();
                 renderLoaders();
             }
         }
@@ -439,11 +470,9 @@
             ldr.isActive = false;
             kpi.completed++; kpi.bags += ldr.bags; kpi.tons += currentTons;
             
-            document.getElementById('kpi-completed').innerText = kpi.completed;
-            document.getElementById('kpi-bags').innerText = kpi.bags;
-            document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-400 font-normal">MT</span>`;
-            
-            renderLoaders(); renderRecordsTable();
+            saveDataToStorage();
+            renderLoaders(); 
+            renderRecordsTable();
         }
 
         renderLoaders();
