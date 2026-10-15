@@ -232,7 +232,6 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-        // تحديث أسماء الرافعات لتكون Tahama-Bay 1 إلى 8
         let loadersData = Array.from({length: 8}, (_, i) => ({
             id: i + 1, name: `Tahama-Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
         }));
@@ -349,7 +348,7 @@
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
                 let manualData = prompt("أدخل رقم بوليصة الشحن (مثال: DW25KQ):", "DW25KQ");
-                if (manualData) askForLoaderAndStart(manualData);
+                if (manualData) processScanData(manualData, 1);
                 return;
             }
 
@@ -363,7 +362,8 @@
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 function onScanSuccess(decodedText) {
                     closeQRCamera();
-                    askForLoaderAndStart(decodedText);
+                    // عند مسح الرمز، نقوم بتشغيل أول رافعة فارغة فوراً وبكل سلاسة بدون أي إزعاج
+                    processScanData(decodedText);
                 },
                 function onScanFailure(error) {}
             ).then(() => { isCameraActive = true; }).catch((err) => {
@@ -378,24 +378,15 @@
             }
         }
 
-        // نافذة اختيار الرافعة الذكية والمستقرة (تدعم الإدخال اليدوي الصحيح)
-        function askForLoaderAndStart(decodedText) {
+        // التوجيه الذكي المباشر بدون إظهار نوافذ معلقة
+        function processScanData(decodedText) {
             let plate = decodedText.split(/[\n\r|,-]/)[0].trim() || "DW25KQ";
             
-            let input = prompt(`📷 تم مسح الباركود بنجاح!\nالبيانات: ${plate}\n\n👉 أدخل رقم الرافعة المطلوب (من 1 إلى 8):`, "3");
+            // البحث عن أول رافعة فارغة (IDLE) لتشغيلها تلقائياً وسريعاً
+            let targetLoader = loadersData.find(l => !l.isActive);
             
-            if (input === null) return; // إذا ضغط إلغاء
-
-            let targetId = parseInt(input.trim());
-
-            if (isNaN(targetId) || targetId < 1 || targetId > 8) {
-                alert("❌ رقم غير صحيح. يرجى إدخال رقم بين 1 و 8 فقط.");
-                return;
-            }
-
-            let targetLoader = loadersData.find(l => l.id === targetId);
-            if (targetLoader.isActive) {
-                alert(`⚠️ عذراً، الرافعة Tahama-Bay ${targetId} مشغولة حالياً!`);
+            if (!targetLoader) {
+                alert("⚠️ جميع الرافعات الـ 8 مشغولة حالياً!");
                 return;
             }
 
@@ -407,12 +398,11 @@
             if (bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
 
             renderLoaders();
-            alert(`✅ تم توجيه الشاحنة بنجاح إلى Tahama-Bay ${targetId}!`);
         }
 
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
-            let p = prompt(`أدخل بوليصة أو رقم لوحة الشاحنة لـ Tahama-Bay ${id}:`, "DW25KQ");
+            let p = prompt(`أدخل بوليصة أو رقم لوحة الشاحنة لـ ${ldr.name}:`, "DW25KQ");
             if (p) {
                 ldr.isActive = true;
                 ldr.plate = p.toUpperCase();
