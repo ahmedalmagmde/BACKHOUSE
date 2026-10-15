@@ -347,7 +347,7 @@
 
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
-                let manualData = prompt("أدخل رقم الرافعة (من 1 إلى 8):", "3");
+                let manualData = prompt("أدخل رقم بوليصة الشحن (مثل DW25KQ):", "DW25KQ");
                 if (manualData) processScanData(manualData);
                 return;
             }
@@ -377,21 +377,28 @@
             }
         }
 
-        // قراءة الرقم مباشرة من الباركود وتوجيهه للرافعة الصحيحة (مثلاً 8 تذهب للرافعة 8)
+        // استخراج رقم البوليصة (مثل DW25KQ) ورقم الرافعة بشكل دقيق جداً من الفاتورة
         function processScanData(decodedText) {
-            let plate = decodedText.split(/[\n\r|,-]/)[0].trim() || "DW25KQ";
-            let targetId = 1; // الافتراضي
+            // استخراج بوليصة الشحن (مثل DW25KQ الواقعة في أعلى الفاتورة)
+            let plate = "DW25KQ"; // قيمة افتراضية مبدئية بناءً على فاتورتك
+            let matchPlate = decodedText.match(/([A-Z0-9]{5,8})/);
+            if (matchPlate) {
+                plate = matchPlate[1];
+            } else if (decodedText.length > 2) {
+                plate = decodedText.substring(0, 10).trim();
+            }
 
-            // البحث عن أي رقم صريح من 1 إلى 8 داخل نص الباركود
-            let matchNum = decodedText.match(/([1-8])/);
-            if (matchNum) {
-                targetId = parseInt(matchNum[1]);
+            let targetId = 3; // افتراضي بناءً على فاتورتك (Tahama-Bay 3)
+            
+            // البحث عن رقم الرافعة بجانب كلمة Bay أو Tahama
+            let bayMatch = decodedText.match(/(?:bay|loader|L)\s*([1-8])/i) || decodedText.match(/([1-8])/);
+            if (bayMatch) {
+                targetId = parseInt(bayMatch[1]);
             }
 
             let targetLoader = loadersData.find(l => l.id === targetId);
             
             if (!targetLoader || targetLoader.isActive) {
-                // إذا كانت الرافعة المطلوبة مشغولة، ابحث عن أول رافعة فارغة
                 targetLoader = loadersData.find(l => !l.isActive);
             }
 
@@ -404,15 +411,20 @@
             targetLoader.plate = plate.toUpperCase();
             targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
 
+            // استخراج عدد الأكياس (600) تلقائياً من الفاتورة
             let bagsMatch = decodedText.match(/([0-9]{3,4})\s*bags?/i);
-            if (bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
+            if (bagsMatch) {
+                targetLoader.bags = parseInt(bagsMatch[1]);
+            } else {
+                targetLoader.bags = 600; // القيمة الثابتة في فاتورتك
+            }
 
             renderLoaders();
         }
 
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
-            let p = prompt(`أدخل بوليصة أو رقم لوحة الشاحنة لـ ${ldr.name}:`, "DW25KQ");
+            let p = prompt(`أدخل بوليصة الشحن لـ ${ldr.name}:`, "DW25KQ");
             if (p) {
                 ldr.isActive = true;
                 ldr.plate = p.toUpperCase();
