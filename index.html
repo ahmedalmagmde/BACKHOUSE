@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SPCC Tahama - Auto Loader System</title>
-    <!-- مكتبات التصميم والأيقونات -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- مكتبة الكاميرا المستقرة -->
@@ -23,7 +22,6 @@
 </head>
 <body class="pb-24 antialiased transition-all duration-300">
 
-    <!-- الشريط العلوي -->
     <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -51,13 +49,11 @@
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
     <main class="max-w-5xl mx-auto p-4 space-y-4">
         
         <!-- ==================== التبويب 1: الرئيسية ==================== -->
         <div id="tab-home" class="tab-content block space-y-4">
             
-            <!-- شريط المشغل والوردية -->
             <div class="glass-card rounded-2xl p-4 shadow-md text-white flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-user-circle text-2xl text-emerald-400"></i>
@@ -82,7 +78,6 @@
                 </div>
             </div>
 
-            <!-- بطاقات الإحصائيات -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="glass-card p-3 rounded-xl shadow-sm">
                     <div class="flex justify-between text-slate-400 text-[11px]">
@@ -114,23 +109,19 @@
                 </div>
             </div>
 
-            <!-- زر الكاميرا -->
             <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/40 transition flex items-center justify-center gap-3">
                 <i class="fa-solid fa-qrcode text-2xl"></i>
-                <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR)</span>
+                <span class="lang-ar">مسح الرمز (QR) بالكاميرا الخلفية</span>
                 <span class="lang-en">OPEN CAMERA & SCAN QR</span>
             </button>
 
-            <!-- منطقة الرافعات -->
             <div class="pt-2">
                 <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
                     <i class="fa-solid fa-list-check text-emerald-400"></i>
                     <span class="lang-ar">مراقبة الرافعات (1 - 8)</span>
                     <span class="lang-en">Loaders Monitor (1 - 8)</span>
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container">
-                    <!-- سيتم حقن الرافعات هنا عبر الجافاسكربت -->
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
             </div>
         </div>
 
@@ -146,9 +137,7 @@
                     <span class="lang-ar">إرسال تقرير</span><span class="lang-en">Email Report</span>
                 </button>
             </div>
-            <div id="records-list" class="space-y-3">
-                <!-- سيتم حقن السجلات هنا -->
-            </div>
+            <div id="records-list" class="space-y-3"></div>
         </div>
 
         <!-- ==================== التبويب 3: التقارير ==================== -->
@@ -183,17 +172,16 @@
             <div class="p-4 bg-[#0B1528] border-b border-[#1E2E4A] flex justify-between items-center">
                 <h3 class="text-white font-bold flex items-center gap-2">
                     <i class="fa-solid fa-camera text-emerald-400"></i>
-                    <span class="lang-ar">مسح الباركود</span><span class="lang-en">Scan Barcode</span>
+                    <span class="lang-ar">توجيه الكاميرا للباركود</span><span class="lang-en">Scan Barcode</span>
                 </h3>
                 <button onclick="closeQRCamera()" class="text-slate-400 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg transition font-bold">
                     إغلاق
                 </button>
             </div>
             <div class="p-4 bg-slate-900 relative">
-                <!-- عنصر قارئ الباركود الأساسي -->
-                <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black min-h-[250px]"></div>
-                <div id="camera-error" class="hidden mt-4 p-3 bg-amber-500/10 border border-amber-500/40 rounded-xl text-amber-300 text-xs text-center leading-relaxed">
-                    يرجى السماح باستخدام الكاميرا. إذا لم تعمل، استخدم الإدخال اليدوي.
+                <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black min-h-[300px]"></div>
+                <div id="camera-error" class="hidden mt-4 p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-300 text-xs text-center leading-relaxed">
+                    لا يمكن الوصول للكاميرا. يرجى التأكد من إعطاء صلاحية الكاميرا للمتصفح.
                 </div>
             </div>
         </div>
@@ -283,7 +271,7 @@
                         <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="font-bold text-sm text-white">L-${ldr.id}</span>
+                                <span class="font-bold text-sm text-white">L-${ldr.id} <span class="text-[10px] text-slate-400">(Bay ${ldr.id})</span></span>
                             </div>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                                 ${isAr ? 'قيد التحميل' : 'IN PROGRESS'}
@@ -349,7 +337,7 @@
                 <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2">
                     <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
                         <span class="font-bold text-base text-white tracking-wider">${rec.plate}</span>
-                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">L-${rec.loaderId}</span>
+                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">L-${rec.loaderId} (Bay ${rec.loaderId})</span>
                     </div>
                     <div class="grid grid-cols-2 text-xs text-slate-400 gap-y-2 pt-1">
                         <div>${isAr ? 'المشغل:' : 'Op:'} <span class="text-white font-semibold">${rec.operator}</span></div>
@@ -366,26 +354,26 @@
             if (completedRecordsList.length === 0) {
                 alert("لا توجد سجلات مكتملة لإرسالها!"); return;
             }
-            // إيميلات الإدارة (يمكنك تعديلها)
             let targetEmails = "admin@spcc.com.sa,packhouse@spcc.com.sa";
             let date = new Date().toISOString().split('T')[0];
             let subject = encodeURIComponent(`تقرير الشحنات المكتملة - مصنع تهامة (${date})`);
             let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
             
             completedRecordsList.forEach((rec, index) => {
-                bodyText += `${index + 1}. الرافعة: L-${rec.loaderId} | اللوحة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
+                bodyText += `${index + 1}. الرافعة: L-${rec.loaderId} (Bay ${rec.loaderId}) | بوليصة/اللوحة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
             });
             
             bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
             window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
         }
 
-        // 6. نظام الكاميرا الآمن
-        let html5QrcodeScanner = null;
+        // 6. نظام الكاميرا الآمن (يفتح الكاميرا الخلفية مباشرة)
+        let html5QrCode = null;
+        let isCameraActive = false;
 
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
-                let manualData = prompt("المتصفح يمنع الكاميرا لأن الملف غير مرفوع على الإنترنت (GitHub).\n\nكبديل مؤقت، أدخل البيانات كالتالي (مثال: L8 4821 BDR):", "L8 4821 BDR");
+                let manualData = prompt("تنبيه: المتصفح يمنع الكاميرا لأن الملف غير مرفوع على رابط HTTPS.\n\nكبديل مؤقت للتجربة، أدخل نص الباركود (مثال: Tahama-Bay 3 | DW25KQ):", "Tahama-Bay 3 | DW25KQ");
                 if (manualData) processScanData(manualData);
                 return;
             }
@@ -393,77 +381,95 @@
             document.getElementById('qr-modal').classList.remove('hidden');
             document.getElementById('camera-error').classList.add('hidden');
             
-            try {
-                // نستخدم Html5QrcodeScanner لأنه الأكثر استقراراً مع المتصفحات
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            } catch(e) {
-                console.error("Camera Error:", e);
-                document.getElementById('camera-error').classList.remove('hidden');
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
             }
+
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                function onScanSuccess(decodedText) {
+                    closeQRCamera();
+                    processScanData(decodedText);
+                },
+                function onScanFailure(error) {}
+            ).then(() => {
+                isCameraActive = true;
+            }).catch((err) => {
+                document.getElementById('camera-error').classList.remove('hidden');
+            });
         }
 
         function closeQRCamera() {
             document.getElementById('qr-modal').classList.add('hidden');
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(error => console.error(error));
+            if (html5QrCode && isCameraActive) {
+                html5QrCode.stop().then(() => {
+                    isCameraActive = false;
+                    html5QrCode.clear();
+                }).catch(err => console.error("Stop error:", err));
             }
         }
 
-        // 7. معالجة بيانات الباركود (الذكاء الاصطناعي لاختيار الرافعة)
+        // 7. معالجة الباركود المطورة (AI) للتعرف على Bay و Loader
         function processScanData(decodedText) {
             let targetId = null;
-            let finalPlate = decodedText;
+            let finalPlate = "";
 
-            // محاولة 1: استخراج رقم من الباركود (مثل L8 أو Loader 8)
-            let matchLoader = decodedText.match(/L\s*-?\s*([1-8])/i) || decodedText.match(/loader\s*-?\s*([1-8])/i);
-            if (matchLoader) targetId = parseInt(matchLoader[1]);
+            // 1. الذكاء الاصطناعي: يبحث الآن عن كلمة Bay أو Loader أو L متبوعة برقم
+            let matchLoader = decodedText.match(/(?:bay|loader|L)\s*-?\s*([1-8])/i);
+            if (matchLoader) {
+                targetId = parseInt(matchLoader[1]);
+            }
             
-            // محاولة 2: إذا كان الباركود يبدأ برقم من 1-8 مباشرة (مثل: 8|4821BDR)
+            // 2. إذا كان الباركود يبدأ برقم مباشرة (مثل 3|DW25KQ)
             if (!targetId) {
                 let matchStart = decodedText.match(/^([1-8])[\s|,|-]/);
-                if (matchStart) targetId = parseInt(matchStart[1]);
+                if (matchStart) {
+                    targetId = parseInt(matchStart[1]);
+                }
             }
 
-            // إذا لم يتم تحديد الرافعة، اسأل المشغل
+            // 3. إذا لم يجد كلمة Bay أو أي رقم، يسأل المشغل (بدون رقم افتراضي)
             if (!targetId) {
-                let input = prompt(`تم قراءة الرمز: ${decodedText}\n\nإلى أي رافعة تريد تعيين هذه الشاحنة؟ (من 1 إلى 8):`, "1");
-                targetId = parseInt(input);
+                let input = prompt(`الباركود: ${decodedText}\n\n⚠️ لم يتمكن النظام من إيجاد كلمة (Bay) أو رقم الرافعة داخل الرمز.\nالرجاء إدخال رقم الرافعة يدوياً (من 1 إلى 8):`, "");
+                if (input && !isNaN(input)) {
+                    targetId = parseInt(input.trim());
+                }
             }
 
             if (!targetId || targetId < 1 || targetId > 8) {
-                alert("رقم الرافعة غير صحيح. تم الإلغاء.");
+                alert("رقم الرافعة غير صحيح أو تم الإلغاء.");
                 return;
             }
 
             let targetLoader = loadersData.find(l => l.id === targetId);
             if (targetLoader.isActive) {
-                alert(`عذراً، الرافعة L-${targetId} مشغولة حالياً!`);
+                alert(`عذراً، الرافعة L-${targetId} مشغولة حالياً! قم بإنهاء تحميلها أولاً.`);
                 return;
             }
 
-            // تنظيف النص ليكون رقم لوحة فقط
-            finalPlate = decodedText.replace(/L\s*-?\s*[1-8]/i, '').replace(/loader\s*-?\s*[1-8]/i, '').trim();
+            // استخراج بوليصة الشحن (DW25KQ) من النص
+            finalPlate = decodedText.split(/[\n\r|,-]/)[0].replace(/(?:bay|loader|L)\s*-?\s*[1-8]/i, '').trim();
+            if(!finalPlate || finalPlate.length < 2) {
+                finalPlate = decodedText.substring(0, 10).trim();
+            }
 
             targetLoader.isActive = true;
-            targetLoader.plate = finalPlate.substring(0, 15).toUpperCase() || "TRUCK-" + Math.floor(Math.random() * 1000);
+            targetLoader.plate = finalPlate.toUpperCase();
             targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
             
+            // استخراج عدد الأكياس إذا كان موجود في الباركود
+            let bagsMatch = decodedText.match(/([0-9]{3,4})\s*bags?/i);
+            if(bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
+
             renderLoaders();
-            alert(`تم المسح بنجاح!\nتوجيه الشاحنة إلى الرافعة: L-${targetId}`);
+            alert(`✅ تم المسح بنجاح!\nالبوليصة: ${targetLoader.plate}\nتوجيه الشاحنة إلى: L-${targetId} (Bay ${targetId})`);
         }
 
-        function onScanSuccess(decodedText) {
-            closeQRCamera();
-            processScanData(decodedText);
-        }
-
-        function onScanFailure() {}
-
-        // 8. التحكم اليدوي
+        // 8. التحكم اليدوي وإنهاء التحميل
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
-            let p = prompt("أدخل رقم لوحة الشاحنة لبدء التحميل:", "4821 BDR");
+            let p = prompt(`أدخل بوليصة أو رقم لوحة الشاحنة للرافعة L-${id}:`, "DW25KQ");
             if (p) {
                 ldr.isActive = true;
                 ldr.plate = p.toUpperCase();
