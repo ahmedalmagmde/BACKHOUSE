@@ -1,27 +1,36 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="html-root">
+<html lang="ar" dir="rtl" id="html-root" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SPCC Tahama - Auto Loader System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { background-color: #0B1528; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        body { -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
         html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
         html[dir="ltr"] body { font-family: 'Inter', sans-serif; }
         html[dir="rtl"] .lang-en { display: none; }
         html[dir="ltr"] .lang-ar { display: none; }
         ::-webkit-scrollbar { width: 0px; background: transparent; }
-        .glass-card { background: #0F1E36; border: 1px solid #1E2E4A; }
+        
+        /* الوضع الداكن والفاتح */
+        html.dark body { background-color: #0B1528; color: #f1f5f9; }
+        html.dark .glass-card { background: #0F1E36; border: 1px solid #1E2E4A; }
+        
+        html:not(.dark) body { background-color: #F8FAFC; color: #1E293B; }
+        html:not(.dark) .glass-card { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
     </style>
 </head>
-<body class="pb-24 antialiased transition-all duration-300">
+<body class="pb-24 antialiased">
 
-    <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
+    <header class="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <img src="logo.png" alt="SPCC Logo" class="w-12 h-12 rounded-xl shadow-lg object-contain bg-white/5 p-0.5 border border-[#FBB03B]/30" onerror="this.style.display='none'">
@@ -31,16 +40,22 @@
                     <div class="text-[11px] font-bold flex items-center gap-1 mt-0.5">
                         <span class="text-[#FBB03B] lang-ar">مصنع تهامة |</span>
                         <span class="text-[#FBB03B] lang-en">Tahama Plant |</span>
-                        <span class="text-slate-400 lang-ar">نظام التحميل الآلي</span>
-                        <span class="text-slate-400 lang-en">Auto Loader System</span>
+                        <span class="text-slate-400 dark:text-slate-400 lang-ar">نظام التحميل الآلي</span>
+                        <span class="text-slate-400 dark:text-slate-400 lang-en">Auto Loader System</span>
                     </div>
                 </div>
             </div>
+            
+            <!-- أزرار التحكم العلوية (اللغة، الوضع الليلي، الساعة) -->
             <div class="flex items-center gap-2">
-                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 font-mono text-[11px]">
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-800 dark:bg-slate-900 border border-slate-700 dark:border-slate-800 rounded-xl text-slate-200 dark:text-slate-300 font-mono text-[11px]">
                     <i class="fa-regular fa-clock text-[#FBB03B]"></i>
                     <span id="live-time">00:00:00</span>
                 </div>
+                <!-- زر الوضع الليلي والنهاري -->
+                <button onclick="toggleTheme()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 px-3 py-1 rounded-xl text-xs font-bold border border-slate-700 transition" title="تبديل الوضع الليلي والنهاري">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
                 <button onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded-xl text-xs font-bold border border-slate-700 transition">
                     <i class="fa-solid fa-globe"></i> <span class="lang-ar">EN</span><span class="lang-en">AR</span>
                 </button>
@@ -52,13 +67,13 @@
         
         <!-- التبويب 1: الرئيسية -->
         <div id="tab-home" class="tab-content block space-y-4">
-            <div class="glass-card rounded-2xl p-4 shadow-md text-white flex justify-between items-center">
+            <div class="glass-card rounded-2xl p-4 shadow-md flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-user-circle text-2xl text-emerald-400"></i>
+                    <i class="fa-solid fa-user-circle text-2xl text-emerald-500"></i>
                     <div>
-                        <div class="text-[11px] text-slate-400 lang-ar">المشغل الحالي:</div>
-                        <div class="text-[11px] text-slate-400 lang-en">Operator:</div>
-                        <select id="operatorSelect" class="bg-transparent font-bold text-sm text-white focus:outline-none cursor-pointer border-b border-dashed border-slate-500 pb-0.5">
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 lang-ar">المشغل الحالي:</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 lang-en">Operator:</div>
+                        <select id="operatorSelect" class="bg-transparent font-bold text-sm dark:text-white text-slate-800 focus:outline-none cursor-pointer border-b border-dashed border-slate-400 pb-0.5">
                             <option class="text-slate-900" value="Ahmed Al-Ghamdi">Ahmed Al-Ghamdi</option>
                             <option class="text-slate-900" value="Mohammed Al-Shehri">Mohammed Al-Shehri</option>
                             <option class="text-slate-900" value="Saeed Al-Zahrani">Saeed Al-Zahrani</option>
@@ -69,53 +84,53 @@
                     </div>
                 </div>
                 <div class="text-end">
-                    <span id="shift-badge" class="px-3 py-1 rounded-full border text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
+                    <span id="shift-badge" class="px-3 py-1 rounded-full border text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
                         Shift A
                     </span>
-                    <div class="text-[10px] text-slate-400 mt-1" id="live-date">--/--/----</div>
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-1" id="live-date">--/--/----</div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-400 text-[11px]">
+                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
                         <span class="font-medium lang-ar">الرافعات النشطة</span><span class="font-medium lang-en">Active</span>
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mt-1"></span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mt-1"></span>
                     </div>
-                    <div class="text-xl font-black text-white mt-1" id="kpi-active">0 <span class="text-xs text-slate-400 font-normal">/ 8</span></div>
+                    <div class="text-xl font-black dark:text-white text-slate-800 mt-1" id="kpi-active">0 <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">/ 8</span></div>
                 </div>
                 <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-400 text-[11px]">
+                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
                         <span class="font-medium lang-ar">المكتملة</span><span class="font-medium lang-en">Completed</span>
-                        <i class="fa-solid fa-check-circle text-emerald-400"></i>
+                        <i class="fa-solid fa-check-circle text-emerald-500"></i>
                     </div>
-                    <div class="text-xl font-black text-emerald-400 mt-1" id="kpi-completed">0</div>
+                    <div class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1" id="kpi-completed">0</div>
                 </div>
                 <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-400 text-[11px]">
+                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
                         <span class="font-medium lang-ar">الأكياس</span><span class="font-medium lang-en">Bags</span>
-                        <i class="fa-solid fa-box text-sky-400"></i>
+                        <i class="fa-solid fa-box text-sky-500"></i>
                     </div>
-                    <div class="text-xl font-black text-sky-300 mt-1" id="kpi-bags">0</div>
+                    <div class="text-xl font-black text-sky-600 dark:text-sky-300 mt-1" id="kpi-bags">0</div>
                 </div>
                 <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-400 text-[11px]">
+                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
                         <span class="font-medium lang-ar">الأطنان</span><span class="font-medium lang-en">Tons</span>
                         <i class="fa-solid fa-layer-group text-[#FBB03B]"></i>
                     </div>
-                    <div class="text-xl font-black text-[#FBB03B] mt-1" id="kpi-tons">0 <span class="text-xs text-slate-400 font-normal">MT</span></div>
+                    <div class="text-xl font-black text-amber-600 dark:text-[#FBB03B] mt-1" id="kpi-tons">0 <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">MT</span></div>
                 </div>
             </div>
 
-            <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/40 transition flex items-center justify-center gap-3">
+            <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-3">
                 <i class="fa-solid fa-qrcode text-2xl"></i>
                 <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR)</span>
                 <span class="lang-en">OPEN CAMERA & SCAN QR</span>
             </button>
 
             <div class="pt-2">
-                <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
-                    <i class="fa-solid fa-list-check text-emerald-400"></i>
+                <h2 class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-list-check text-emerald-500"></i>
                     <span class="lang-ar">مراقبة الرافعات (Tahama-Bay 1 إلى 8)</span>
                     <span class="lang-en">Loaders Monitor (Tahama-Bay 1 - 8)</span>
                 </h2>
@@ -126,8 +141,8 @@
         <!-- التبويب 2: السجلات -->
         <div id="tab-records" class="tab-content hidden space-y-4">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-list text-emerald-400"></i>
+                <h2 class="text-xl font-bold dark:text-white text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-emerald-500"></i>
                     <span class="lang-ar">السجلات اليومية</span><span class="lang-en">Daily Records</span>
                 </h2>
                 <button onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
@@ -140,25 +155,25 @@
 
         <!-- التبويب 3: التقارير -->
         <div id="tab-reports" class="tab-content hidden space-y-4">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+            <h2 class="text-xl font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-chart-pie text-emerald-500"></i>
                 <span class="lang-ar">تقارير الأداء</span><span class="lang-en">Performance Reports</span>
             </h2>
             <div class="glass-card p-6 rounded-2xl text-center">
-                <i class="fa-solid fa-chart-bar text-4xl text-slate-600 mb-3"></i>
-                <p class="text-slate-400 text-sm">صفحة التقارير والرسوم البيانية قيد الإنشاء...</p>
+                <i class="fa-solid fa-chart-bar text-4xl text-slate-400 mb-3"></i>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">صفحة التقارير والرسوم البيانية قيد الإنشاء...</p>
             </div>
         </div>
 
         <!-- التبويب 4: المزيد -->
         <div id="tab-more" class="tab-content hidden space-y-4">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-ellipsis text-emerald-400"></i>
+            <h2 class="text-xl font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-ellipsis text-emerald-500"></i>
                 <span class="lang-ar">إعدادات النظام</span><span class="lang-en">System Settings</span>
             </h2>
             <div class="glass-card p-6 rounded-2xl text-center">
-                <i class="fa-solid fa-cog text-4xl text-slate-600 mb-3"></i>
-                <p class="text-slate-400 text-sm">صفحة الإعدادات قيد الإنشاء...</p>
+                <i class="fa-solid fa-cog text-4xl text-slate-400 mb-3"></i>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">صفحة الإعدادات قيد الإنشاء...</p>
             </div>
         </div>
 
@@ -166,10 +181,10 @@
 
     <!-- نافذة الكاميرا -->
     <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-[#0F1E36] rounded-2xl border border-[#1E2E4A] overflow-hidden flex flex-col">
-            <div class="p-4 bg-[#0B1528] border-b border-[#1E2E4A] flex justify-between items-center">
+        <div class="w-full max-w-md bg-slate-900 dark:bg-[#0F1E36] rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
+            <div class="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center">
                 <h3 class="text-white font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-camera text-emerald-400"></i>
+                    <i class="fa-solid fa-camera text-emerald-500"></i>
                     <span class="lang-ar">توجيه الكاميرا للباركود</span><span class="lang-en">Scan Barcode</span>
                 </h3>
                 <button onclick="closeQRCamera()" class="text-slate-400 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg transition font-bold">
@@ -186,32 +201,61 @@
     </div>
 
     <!-- شريط التنقل السفلي -->
-    <nav class="fixed bottom-0 w-full bg-[#0B1528]/95 backdrop-blur-lg border-t border-[#1E2E4A] pb-safe z-40">
+    <nav class="fixed bottom-0 w-full bg-white/95 dark:bg-[#0B1528]/95 backdrop-blur-lg border-t border-slate-200 dark:border-[#1E2E4A] pb-safe z-40">
         <div class="max-w-md mx-auto flex items-center justify-around h-16">
-            <button id="nav-home" onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-emerald-400 font-bold w-16 transition">
+            <button id="nav-home" onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-emerald-500 font-bold w-16 transition">
                 <i class="fa-solid fa-house text-lg mb-1"></i><span class="text-[10px] lang-ar">الرئيسية</span><span class="text-[10px] lang-en">Home</span>
             </button>
-            <button id="nav-records" onclick="switchTab('records')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
+            <button id="nav-records" onclick="switchTab('records')" class="nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 w-16 transition">
                 <i class="fa-solid fa-clipboard-list text-lg mb-1"></i><span class="text-[10px] lang-ar">السجلات</span><span class="text-[10px] lang-en">Records</span>
             </button>
-            <button id="nav-reports" onclick="switchTab('reports')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
+            <button id="nav-reports" onclick="switchTab('reports')" class="nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 w-16 transition">
                 <i class="fa-solid fa-chart-pie text-lg mb-1"></i><span class="text-[10px] lang-ar">التقارير</span><span class="text-[10px] lang-en">Reports</span>
             </button>
-            <button id="nav-more" onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
+            <button id="nav-more" onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 w-16 transition">
                 <i class="fa-solid fa-ellipsis text-lg mb-1"></i><span class="text-[10px] lang-ar">المزيد</span><span class="text-[10px] lang-en">More</span>
             </button>
         </div>
     </nav>
 
-    <!-- الأكواد البرمجية مع الحفظ الدائم (LocalStorage) -->
+    <!-- الأكواد البرمجية -->
     <script>
+        // نظام الوضع الليلي والنهاري
+        function toggleTheme() {
+            const htmlTag = document.getElementById('html-root');
+            const icon = document.getElementById('theme-icon');
+            if (htmlTag.classList.contains('dark')) {
+                htmlTag.classList.remove('dark');
+                localStorage.setItem('spcc_theme', 'light');
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                htmlTag.classList.add('dark');
+                localStorage.setItem('spcc_theme', 'dark');
+                icon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        // استرجاع الوضع المحفوظ عند التحميل
+        (function() {
+            const savedTheme = localStorage.getItem('spcc_theme');
+            const htmlTag = document.getElementById('html-root');
+            const icon = document.getElementById('theme-icon');
+            if (savedTheme === 'light') {
+                htmlTag.classList.remove('dark');
+                if(icon) icon.className = 'fa-solid fa-sun';
+            } else {
+                htmlTag.classList.add('dark');
+                if(icon) icon.className = 'fa-solid fa-moon';
+            }
+        })();
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => { el.classList.remove('block'); el.classList.add('hidden'); });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('tab-' + tabId).classList.add('block');
-            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-emerald-400', 'font-bold'); btn.classList.add('text-slate-400', 'hover:text-slate-200'); });
+            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-emerald-500', 'font-bold'); btn.classList.add('text-slate-500', 'dark:text-slate-400'); });
             const activeBtn = document.getElementById('nav-' + tabId);
-            activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200'); activeBtn.classList.add('text-emerald-400', 'font-bold');
+            activeBtn.classList.remove('text-slate-500', 'dark:text-slate-400'); activeBtn.classList.add('text-emerald-500', 'font-bold');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -232,7 +276,6 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-        // استرجاع البيانات من الذاكرة الدائمة (LocalStorage) إن وجدت
         let savedLoaders = localStorage.getItem('spcc_loaders');
         let savedRecords = localStorage.getItem('spcc_records');
         let savedKpi = localStorage.getItem('spcc_kpi');
@@ -244,7 +287,6 @@
         let completedRecordsList = savedRecords ? JSON.parse(savedRecords) : [];
         let kpi = savedKpi ? JSON.parse(savedKpi) : { completed: 0, bags: 0, tons: 0 };
 
-        // دالة حفظ البيانات في ذاكرة المتصفح الدائمة
         function saveDataToStorage() {
             localStorage.setItem('spcc_loaders', JSON.stringify(loadersData));
             localStorage.setItem('spcc_records', JSON.stringify(completedRecordsList));
@@ -260,28 +302,28 @@
             loadersData.forEach(ldr => {
                 if(ldr.isActive) activeCount++;
                 const cardHTML = ldr.isActive ? `
-                    <div class="rounded-2xl border border-emerald-500/60 bg-[#0E223D] shadow-lg overflow-hidden flex flex-col">
-                        <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
+                    <div class="rounded-2xl border border-emerald-500/60 bg-white dark:bg-[#0E223D] shadow-lg overflow-hidden flex flex-col">
+                        <div class="p-3 border-b border-slate-200 dark:border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="font-bold text-sm text-white">${ldr.name}</span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="font-bold text-sm dark:text-white text-slate-800">${ldr.name}</span>
                             </div>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40">
                                 ${isAr ? 'قيد التحميل' : 'IN PROGRESS'}
                             </span>
                         </div>
                         <div class="p-3 flex-1 space-y-2">
                             <div class="flex justify-between items-center">
-                                <div class="font-mono font-black text-base text-white">${ldr.plate}</div>
-                                <span class="text-[11px] font-bold px-2 py-1 rounded-lg border bg-emerald-500/15 text-emerald-400 border-emerald-500/30">${ldr.type}</span>
+                                <div class="font-mono font-black text-base dark:text-white text-slate-900">${ldr.plate}</div>
+                                <span class="text-[11px] font-bold px-2 py-1 rounded-lg border bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">${ldr.type}</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-1.5 bg-[#0B1528] p-2 rounded-xl text-xs">
-                                <div><span class="text-slate-400 block text-[10px]">${isAr ? 'الأكياس' : 'Bags'}</span><span class="font-bold text-white">${ldr.bags}</span></div>
-                                <div><span class="text-slate-400 block text-[10px]">${isAr ? 'وقت البدء' : 'In Time'}</span><span class="font-mono text-slate-200">${ldr.startTime}</span></div>
+                            <div class="grid grid-cols-2 gap-1.5 bg-slate-100 dark:bg-[#0B1528] p-2 rounded-xl text-xs">
+                                <div><span class="text-slate-500 dark:text-slate-400 block text-[10px]">${isAr ? 'الأكياس' : 'Bags'}</span><span class="font-bold dark:text-white text-slate-800">${ldr.bags}</span></div>
+                                <div><span class="text-slate-500 dark:text-slate-400 block text-[10px]">${isAr ? 'وقت البدء' : 'In Time'}</span><span class="font-mono dark:text-slate-200 text-slate-700">${ldr.startTime}</span></div>
                             </div>
                         </div>
-                        <div class="p-2 border-t border-[#1E2E4A] grid grid-cols-2 gap-2">
-                            <button onclick="cancelLoader(${ldr.id})" class="py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-xs rounded-xl transition">
+                        <div class="p-2 border-t border-slate-200 dark:border-[#1E2E4A] grid grid-cols-2 gap-2">
+                            <button onclick="cancelLoader(${ldr.id})" class="py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-600 dark:text-rose-300 border border-rose-500/40 font-bold text-xs rounded-xl transition">
                                 <i class="fa-solid fa-ban"></i> ${isAr ? 'إلغاء' : 'Cancel'}
                             </button>
                             <button onclick="stopLoader(${ldr.id})" class="py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition">
@@ -289,31 +331,31 @@
                             </button>
                         </div>
                     </div>` : `
-                    <div class="rounded-2xl border border-[#1E2E4A]/80 bg-[#0B1528] overflow-hidden flex flex-col opacity-90">
-                        <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
+                    <div class="rounded-2xl border border-slate-200 dark:border-[#1E2E4A]/80 bg-white dark:bg-[#0B1528] overflow-hidden flex flex-col opacity-90">
+                        <div class="p-3 border-b border-slate-200 dark:border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
-                                <span class="font-bold text-sm text-white">${ldr.name}</span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-slate-400 dark:bg-slate-600"></span>
+                                <span class="font-bold text-sm dark:text-white text-slate-800">${ldr.name}</span>
                             </div>
-                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
                                 ${isAr ? 'جاهز' : 'IDLE'}
                             </span>
                         </div>
-                        <div class="p-4 flex-1 text-center text-slate-500 text-xs flex flex-col items-center justify-center">
+                        <div class="p-4 flex-1 text-center text-slate-400 dark:text-slate-500 text-xs flex flex-col items-center justify-center">
                             <p>${isAr ? 'الرافعة جاهزة' : 'Loader Ready'}</p>
                         </div>
-                        <div class="p-2 border-t border-[#1E2E4A]">
-                            <button onclick="startLoader(${ldr.id})" class="w-full py-2 bg-[#132847] hover:bg-[#1a345b] text-slate-200 border border-[#233d66] text-xs font-semibold rounded-xl transition">
-                                <i class="fa-solid fa-keyboard text-emerald-400"></i> ${isAr ? 'إدخال اللوحة يدوياً' : 'MANUAL START'}
+                        <div class="p-2 border-t border-slate-200 dark:border-[#1E2E4A]">
+                            <button onclick="startLoader(${ldr.id})" class="w-full py-2 bg-slate-100 dark:bg-[#132847] hover:bg-slate-200 dark:hover:bg-[#1a345b] dark:text-slate-200 text-slate-800 border border-slate-300 dark:border-[#233d66] text-xs font-semibold rounded-xl transition">
+                                <i class="fa-solid fa-keyboard text-emerald-500"></i> ${isAr ? 'إدخال اللوحة يدوياً' : 'MANUAL START'}
                             </button>
                         </div>
                     </div>`;
                 container.innerHTML += cardHTML;
             });
-            document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
+            document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">/ 8</span>`;
             document.getElementById('kpi-completed').innerText = kpi.completed;
             document.getElementById('kpi-bags').innerText = kpi.bags;
-            document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-400 font-normal">MT</span>`;
+            document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">MT</span>`;
         }
 
         function renderRecordsTable() {
@@ -323,8 +365,8 @@
             if (completedRecordsList.length === 0) {
                 listContainer.innerHTML = `
                 <div class="glass-card p-6 rounded-2xl text-center">
-                    <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
-                    <p class="text-slate-400 text-sm">${isAr ? 'لا توجد سجلات حالياً. قم بإنهاء تحميل شاحنة لتظهر هنا.' : 'No records yet. End a load to see it here.'}</p>
+                    <i class="fa-solid fa-folder-open text-4xl text-slate-400 dark:text-slate-600 mb-3"></i>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">${isAr ? 'لا توجد سجلات حالياً. قم بإنهاء تحميل شاحنة لتظهر هنا.' : 'No records yet. End a load to see it here.'}</p>
                 </div>`;
                 return;
             }
@@ -333,15 +375,15 @@
             [...completedRecordsList].reverse().forEach(rec => {
                 html += `
                 <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2">
-                    <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
-                        <span class="font-bold text-base text-white tracking-wider">${rec.plate}</span>
-                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">Tahama-Bay ${rec.loaderId}</span>
+                    <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700/50 pb-2">
+                        <span class="font-bold text-base dark:text-white text-slate-900 tracking-wider">${rec.plate}</span>
+                        <span class="text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded">Tahama-Bay ${rec.loaderId}</span>
                     </div>
-                    <div class="grid grid-cols-2 text-xs text-slate-400 gap-y-2 pt-1">
-                        <div>${isAr ? 'المشغل:' : 'Op:'} <span class="text-white font-semibold">${rec.operator}</span></div>
-                        <div>${isAr ? 'الكمية:' : 'Qty:'} <span class="text-emerald-400 font-bold">${rec.bags} ${isAr ? 'كيس' : 'Bags'} (${rec.tons} MT)</span></div>
-                        <div>${isAr ? 'وقت البدء:' : 'In:'} <span class="text-white font-mono">${rec.startTime}</span></div>
-                        <div>${isAr ? 'وقت الانتهاء:' : 'Out:'} <span class="text-amber-400 font-mono">${rec.endTime}</span></div>
+                    <div class="grid grid-cols-2 text-xs text-slate-500 dark:text-slate-400 gap-y-2 pt-1">
+                        <div>${isAr ? 'المشغل:' : 'Op:'} <span class="dark:text-white text-slate-800 font-semibold">${rec.operator}</span></div>
+                        <div>${isAr ? 'الكمية:' : 'Qty:'} <span class="text-emerald-600 dark:text-emerald-400 font-bold">${rec.bags} ${isAr ? 'كيس' : 'Bags'} (${rec.tons} MT)</span></div>
+                        <div>${isAr ? 'وقت البدء:' : 'In:'} <span class="dark:text-white text-slate-800 font-mono">${rec.startTime}</span></div>
+                        <div>${isAr ? 'وقت الانتهاء:' : 'Out:'} <span class="text-amber-600 dark:text-amber-400 font-mono">${rec.endTime}</span></div>
                     </div>
                 </div>`;
             });
@@ -444,7 +486,6 @@
             }
         }
 
-        // --- زر إلغاء التحميل (لتفريغ الرافعة وإعادتها لحالة جاهز بدون تسجيل) ---
         function cancelLoader(id) {
             if (confirm(`هل أنت متأكد من إلغاء تحميل الشاحنة في Tahama-Bay ${id}؟`)) {
                 const ldr = loadersData.find(l => l.id === id);
