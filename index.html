@@ -25,7 +25,6 @@
     <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <!-- صورة الشعار المرفوعة -->
                 <img src="logo.png" alt="SPCC Logo" class="w-12 h-12 rounded-xl shadow-lg object-contain bg-white/5 p-0.5 border border-[#FBB03B]/30">
                 
                 <div class="leading-tight mt-1">
@@ -172,14 +171,17 @@
                     <i class="fa-solid fa-camera text-emerald-400"></i>
                     <span class="lang-ar">مسح الباركود</span><span class="lang-en">Scan Barcode</span>
                 </h3>
-                <button onclick="closeQRCamera()" class="text-slate-400 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg">
+                <button onclick="closeQRCamera()" class="text-slate-400 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg transition">
                     إغلاق
                 </button>
             </div>
             <div class="p-4 bg-slate-900 relative">
+                <!-- مساحة عرض الكاميرا -->
                 <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30"></div>
-                <div id="camera-error" class="hidden mt-4 p-3 bg-amber-500/10 border border-amber-500/40 rounded-xl text-amber-300 text-xs text-center leading-relaxed">
-                    متصفح الجوال يمنع تشغيل الكاميرا لأن الملف غير مرفوع على الإنترنت (HTTPS).<br>يرجى رفع الملف على استضافتك (مثل GitHub Pages) لكي تعمل الكاميرا تلقائياً.
+                
+                <!-- رسالة الخطأ في حال فشل الكاميرا -->
+                <div id="camera-error" class="hidden mt-4 p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-300 text-xs text-center leading-relaxed">
+                    لا يمكن الوصول للكاميرا. يرجى التأكد من: <br>1. إعطاء صلاحية الكاميرا للمتصفح.<br>2. فتح الموقع عبر رابط HTTPS آمن.
                 </div>
             </div>
         </div>
@@ -207,8 +209,7 @@
         // --- نظام التبويبات ---
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('block');
-                el.classList.add('hidden');
+                el.classList.remove('block'); el.classList.add('hidden');
             });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('tab-' + tabId).classList.add('block');
@@ -224,7 +225,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- اللغة ---
+        // --- الترجمة والوقت ---
         function toggleLanguage() {
             const htmlTag = document.getElementById('html-root');
             if (htmlTag.getAttribute('dir') === 'rtl') {
@@ -235,7 +236,6 @@
             renderLoaders();
         }
 
-        // --- الوقت والتاريخ ---
         function updateClock() {
             const now = new Date();
             document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
@@ -313,34 +313,47 @@
             document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
         }
 
-        // --- نظام الكاميرا ---
-        let html5QrcodeScanner = null;
+        // --- نظام الكاميرا بالاعتماد على الكاميرا الخلفية (Environment) ---
+        let html5QrCode = null;
 
         function safeOpenQRCamera() {
+            // التحقق من أن الموقع يعمل على بروتوكول آمن
             if (window.isSecureContext === false) {
-                let manualPlate = prompt("الكاميرا تحتاج إلى رفع الملف على الإنترنت (GitHub) لتعمل.\n\nكبديل مؤقت، أدخل رقم لوحة الشاحنة مباشرة هنا:", "9012 RYD");
-                if (manualPlate) {
-                    processScanData(manualPlate);
-                }
+                let manualPlate = prompt("عذراً، يجب رفع الملف على الإنترنت (مثلاً GitHub Pages) لكي تعمل الكاميرا.\n\nبديل: أدخل رقم اللوحة يدوياً:", "9012 RYD");
+                if (manualPlate) processScanData(manualPlate);
                 return;
             }
 
             document.getElementById('qr-modal').classList.remove('hidden');
             document.getElementById('camera-error').classList.add('hidden');
             
-            try {
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            } catch(e) {
-                document.getElementById('camera-error').classList.remove('hidden');
+            // تهيئة الكاميرا إذا لم تكن مهيأة مسبقاً
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
             }
+
+            // إجبار المتصفح على تشغيل الكاميرا الخلفية (environment)
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0
+                },
+                onScanSuccess,
+                onScanFailure
+            ).catch((err) => {
+                document.getElementById('camera-error').classList.remove('hidden');
+                console.error("Camera Start Error:", err);
+            });
         }
 
         function closeQRCamera() {
             document.getElementById('qr-modal').classList.add('hidden');
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(error => console.error(error));
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                }).catch(err => console.error("Camera Stop Error:", err));
             }
         }
 
@@ -351,19 +364,22 @@
                 emptyLoader.plate = decodedText.substring(0, 10).toUpperCase();
                 emptyLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
                 renderLoaders();
-                alert(`تم مسح الرمز بنجاح!\nاللوحة/التصريح: ${emptyLoader.plate}\nتم ربطها بالرافعة: L-${emptyLoader.id}`);
+                alert(`تم المسح بنجاح!\nبيانات: ${emptyLoader.plate}\nالرافعة المخصصة: L-${emptyLoader.id}`);
             } else {
                 alert('الرمز صحيح، لكن جميع الرافعات الـ 8 مشغولة حالياً!');
             }
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            closeQRCamera();
+            closeQRCamera(); // إغلاق الكاميرا فور التقاط الرمز
             processScanData(decodedText);
         }
 
-        function onScanFailure(error) {}
+        function onScanFailure(error) {
+            // تجاهل أخطاء البحث عن الكود أثناء تحريك الكاميرا
+        }
 
+        // --- التحكم اليدوي ---
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
             let p = prompt("أدخل رقم لوحة الشاحنة لبدء التحميل:", "4821 BDR");
