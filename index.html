@@ -116,8 +116,8 @@
             <div class="pt-2">
                 <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
                     <i class="fa-solid fa-list-check text-emerald-400"></i>
-                    <span class="lang-ar">مراقبة الرافعات (1 - 8)</span>
-                    <span class="lang-en">Loaders Monitor (1 - 8)</span>
+                    <span class="lang-ar">مراقبة الرافعات (Tahama-Bay 1 إلى 8)</span>
+                    <span class="lang-en">Loaders Monitor (Tahama-Bay 1 - 8)</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
             </div>
@@ -232,8 +232,9 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
+        // تحديث أسماء الرافعات لتكون Tahama-Bay 1 إلى 8
         let loadersData = Array.from({length: 8}, (_, i) => ({
-            id: i + 1, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
+            id: i + 1, name: `Tahama-Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
         }));
         let kpi = { completed: 0, bags: 0, tons: 0 };
         let completedRecordsList = [];
@@ -251,7 +252,7 @@
                         <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="font-bold text-sm text-white">L-${ldr.id} <span class="text-[10px] text-amber-300">(Tahama-Bay ${ldr.id})</span></span>
+                                <span class="font-bold text-sm text-white">${ldr.name}</span>
                             </div>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                                 ${isAr ? 'قيد التحميل' : 'IN PROGRESS'}
@@ -277,7 +278,7 @@
                         <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
-                                <span class="font-bold text-sm text-white">L-${ldr.id}</span>
+                                <span class="font-bold text-sm text-white">${ldr.name}</span>
                             </div>
                             <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
                                 ${isAr ? 'جاهز' : 'IDLE'}
@@ -316,7 +317,7 @@
                 <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2">
                     <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
                         <span class="font-bold text-base text-white tracking-wider">${rec.plate}</span>
-                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">L-${rec.loaderId} (Tahama-Bay ${rec.loaderId})</span>
+                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">Tahama-Bay ${rec.loaderId}</span>
                     </div>
                     <div class="grid grid-cols-2 text-xs text-slate-400 gap-y-2 pt-1">
                         <div>${isAr ? 'المشغل:' : 'Op:'} <span class="text-white font-semibold">${rec.operator}</span></div>
@@ -336,7 +337,7 @@
             let subject = encodeURIComponent(`تقرير الشحنات المكتملة - مصنع تهامة (${date})`);
             let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
             completedRecordsList.forEach((rec, index) => {
-                bodyText += `${index + 1}. الرافعة: L-${rec.loaderId} (Tahama-Bay ${rec.loaderId}) | بوليصة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
+                bodyText += `${index + 1}. الرافعة: Tahama-Bay ${rec.loaderId} | بوليصة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
             });
             bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
             window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
@@ -347,7 +348,7 @@
 
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
-                let manualData = prompt("تنبيه: المتصفح يمنع الكاميرا لأن الملف غير مرفوع على رابط HTTPS.\n\nأدخل رقم بوليصة الشحن (مثال: DW25KQ):", "DW25KQ");
+                let manualData = prompt("أدخل رقم بوليصة الشحن (مثال: DW25KQ):", "DW25KQ");
                 if (manualData) askForLoaderAndStart(manualData);
                 return;
             }
@@ -377,31 +378,24 @@
             }
         }
 
-        // الذكاء الاصطناعي المطور للتعرف على Tahama-Bay واستخراج الرقم بدقة
+        // نافذة اختيار الرافعة الذكية والمستقرة (تدعم الإدخال اليدوي الصحيح)
         function askForLoaderAndStart(decodedText) {
             let plate = decodedText.split(/[\n\r|,-]/)[0].trim() || "DW25KQ";
-            let targetId = null;
+            
+            let input = prompt(`📷 تم مسح الباركود بنجاح!\nالبيانات: ${plate}\n\n👉 أدخل رقم الرافعة المطلوب (من 1 إلى 8):`, "3");
+            
+            if (input === null) return; // إذا ضغط إلغاء
 
-            // البحث عن كلمة Bay أو Tahama-Bay متبوعة برقم من 1 إلى 8
-            let bayMatch = decodedText.match(/(?:Tahama\s*-\s*Bay|Bay|Loader|L)\s*([1-8])/i);
-            if (bayMatch) {
-                targetId = parseInt(bayMatch[1]);
-            }
-
-            // إذا لم يتم العثور على الرقم تلقائياً، تظهر النافذة لتطلب من المشغل تحديد الرافعة
-            if (!targetId) {
-                let input = prompt(`📷 تم مسح الباركود بنجاح!\nالبيانات: ${plate}\n\n👉 هذا الباركود لا يحتوي على رقم الرافعة (Tahama-Bay) بشكل واضح.\nالرجاء إدخال رقم الرافعة يدوياً (من 1 إلى 8):`, "3");
-                targetId = parseInt(input);
-            }
+            let targetId = parseInt(input.trim());
 
             if (isNaN(targetId) || targetId < 1 || targetId > 8) {
-                alert("❌ رقم الرافعة غير صحيح. تم إلغاء العملية.");
+                alert("❌ رقم غير صحيح. يرجى إدخال رقم بين 1 و 8 فقط.");
                 return;
             }
 
             let targetLoader = loadersData.find(l => l.id === targetId);
             if (targetLoader.isActive) {
-                alert(`⚠️ عذراً، الرافعة L-${targetId} (Tahama-Bay ${targetId}) مشغولة حالياً!`);
+                alert(`⚠️ عذراً، الرافعة Tahama-Bay ${targetId} مشغولة حالياً!`);
                 return;
             }
 
@@ -409,17 +403,16 @@
             targetLoader.plate = plate.toUpperCase();
             targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
 
-            // استخراج الأكياس (600) إذا وجدت في الباركود
             let bagsMatch = decodedText.match(/([0-9]{3,4})\s*bags?/i);
             if (bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
 
             renderLoaders();
-            alert(`✅ تم توجيه الشاحنة ${targetLoader.plate} بنجاح إلى Tahama-Bay ${targetId} (L-${targetId})!`);
+            alert(`✅ تم توجيه الشاحنة بنجاح إلى Tahama-Bay ${targetId}!`);
         }
 
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
-            let p = prompt(`أدخل بوليصة أو رقم لوحة الشاحنة للرافعة L-${id}:`, "DW25KQ");
+            let p = prompt(`أدخل بوليصة أو رقم لوحة الشاحنة لـ Tahama-Bay ${id}:`, "DW25KQ");
             if (p) {
                 ldr.isActive = true;
                 ldr.plate = p.toUpperCase();
