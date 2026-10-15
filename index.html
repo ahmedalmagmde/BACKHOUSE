@@ -25,7 +25,8 @@
     <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <img src="logo.png" alt="SPCC Logo" class="w-12 h-12 rounded-xl shadow-lg object-contain bg-white/5 p-0.5 border border-[#FBB03B]/30">
+                <!-- صورة الشعار -->
+                <img src="logo.png" alt="SPCC Logo" class="w-12 h-12 rounded-xl shadow-lg object-contain bg-white/5 p-0.5 border border-[#FBB03B]/30" onerror="this.style.display='none'">
                 
                 <div class="leading-tight mt-1">
                     <h1 class="font-extrabold text-[15px] tracking-wide text-white lang-ar">أسمنت المنطقة الجنوبية</h1>
@@ -125,15 +126,27 @@
             </div>
         </div>
 
-        <!-- ==================== التبويب 2: السجلات ==================== -->
+        <!-- ==================== التبويب 2: السجلات (شغال الآن) ==================== -->
         <div id="tab-records" class="tab-content hidden space-y-4">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-clipboard-list text-emerald-400"></i>
-                <span class="lang-ar">السجلات اليومية</span><span class="lang-en">Daily Records</span>
-            </h2>
-            <div class="glass-card p-6 rounded-2xl text-center">
-                <i class="fa-solid fa-database text-4xl text-slate-600 mb-3"></i>
-                <p class="text-slate-400 text-sm">صفحة السجلات قيد الإنشاء... ستظهر الشحنات المكتملة هنا.</p>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-emerald-400"></i>
+                    <span class="lang-ar">السجلات اليومية</span><span class="lang-en">Daily Records</span>
+                </h2>
+                <!-- زر إرسال الإيميل -->
+                <button onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span class="lang-ar">إرسال للإيميل</span><span class="lang-en">Email Report</span>
+                </button>
+            </div>
+            
+            <!-- حاوية السجلات -->
+            <div id="records-list" class="space-y-3">
+                <div class="glass-card p-6 rounded-2xl text-center">
+                    <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
+                    <p class="text-slate-400 text-sm lang-ar">لا توجد سجلات حالياً. قم بإنهاء تحميل شاحنة لتظهر هنا.</p>
+                    <p class="text-slate-400 text-sm lang-en">No records yet. End a load to see it here.</p>
+                </div>
             </div>
         </div>
 
@@ -176,10 +189,7 @@
                 </button>
             </div>
             <div class="p-4 bg-slate-900 relative">
-                <!-- مساحة عرض الكاميرا -->
                 <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30"></div>
-                
-                <!-- رسالة الخطأ في حال فشل الكاميرا -->
                 <div id="camera-error" class="hidden mt-4 p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-300 text-xs text-center leading-relaxed">
                     لا يمكن الوصول للكاميرا. يرجى التأكد من: <br>1. إعطاء صلاحية الكاميرا للمتصفح.<br>2. فتح الموقع عبر رابط HTTPS آمن.
                 </div>
@@ -225,7 +235,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- الترجمة والوقت ---
         function toggleLanguage() {
             const htmlTag = document.getElementById('html-root');
             if (htmlTag.getAttribute('dir') === 'rtl') {
@@ -234,6 +243,7 @@
                 htmlTag.setAttribute('dir', 'rtl'); htmlTag.setAttribute('lang', 'ar');
             }
             renderLoaders();
+            renderRecordsTable(); // تحديث لغة السجلات
         }
 
         function updateClock() {
@@ -248,11 +258,14 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-        // --- إدارة الرافعات ---
+        // --- إدارة الرافعات والسجلات ---
         let loadersData = Array.from({length: 8}, (_, i) => ({
             id: i + 1, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
         }));
         let kpi = { completed: 0, bags: 0, tons: 0 };
+        
+        // مصفوفة لحفظ السجلات المكتملة
+        let completedRecordsList = [];
 
         function renderLoaders() {
             const container = document.getElementById('loaders-container');
@@ -313,13 +326,71 @@
             document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
         }
 
-        // --- نظام الكاميرا بالاعتماد على الكاميرا الخلفية (Environment) ---
+        // --- تحديث قسم السجلات بالبيانات الجديدة ---
+        function renderRecordsTable() {
+            const listContainer = document.getElementById('records-list');
+            const isAr = document.getElementById('html-root').getAttribute('dir') === 'rtl';
+
+            if (completedRecordsList.length === 0) {
+                listContainer.innerHTML = `
+                <div class="glass-card p-6 rounded-2xl text-center">
+                    <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
+                    <p class="text-slate-400 text-sm">${isAr ? 'لا توجد سجلات حالياً. قم بإنهاء تحميل شاحنة لتظهر هنا.' : 'No records yet. End a load to see it here.'}</p>
+                </div>`;
+                return;
+            }
+
+            let html = '';
+            // ترتيب السجلات من الأحدث للأقدم
+            [...completedRecordsList].reverse().forEach(rec => {
+                html += `
+                <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2">
+                    <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
+                        <span class="font-bold text-base text-white tracking-wider">${rec.plate}</span>
+                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">L-${rec.loaderId}</span>
+                    </div>
+                    <div class="grid grid-cols-2 text-xs text-slate-400 gap-y-2 pt-1">
+                        <div>${isAr ? 'المشغل:' : 'Op:'} <span class="text-white font-semibold">${rec.operator}</span></div>
+                        <div>${isAr ? 'الكمية:' : 'Qty:'} <span class="text-emerald-400 font-bold">${rec.bags} ${isAr ? 'كيس' : 'Bags'} (${rec.tons} MT)</span></div>
+                        <div>${isAr ? 'وقت البدء:' : 'In:'} <span class="text-white font-mono">${rec.startTime}</span></div>
+                        <div>${isAr ? 'وقت الانتهاء:' : 'Out:'} <span class="text-amber-400 font-mono">${rec.endTime}</span></div>
+                    </div>
+                </div>`;
+            });
+            listContainer.innerHTML = html;
+        }
+
+        // --- نظام الإيميل (إرسال السجلات للمدراء) ---
+        function sendEmailReport() {
+            if (completedRecordsList.length === 0) {
+                alert("لا توجد سجلات مكتملة لإرسالها!");
+                return;
+            }
+
+            // هنا تضع الإيميلات التي تريد الإرسال إليها، افصل بينها بفاصلة (,)
+            let targetEmails = "admin@spcc.com.sa,packhouse@spcc.com.sa";
+            
+            let date = new Date().toISOString().split('T')[0];
+            let subject = encodeURIComponent(`تقرير الشحنات المكتملة - مصنع تهامة (${date})`);
+            
+            let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
+            
+            completedRecordsList.forEach((rec, index) => {
+                bodyText += `${index + 1}. الرافعة: L-${rec.loaderId} | اللوحة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
+            });
+            
+            bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
+            
+            // يفتح تطبيق الإيميل في الجوال أو الكمبيوتر
+            window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+        }
+
+        // --- نظام الكاميرا ---
         let html5QrCode = null;
 
         function safeOpenQRCamera() {
-            // التحقق من أن الموقع يعمل على بروتوكول آمن
             if (window.isSecureContext === false) {
-                let manualPlate = prompt("عذراً، يجب رفع الملف على الإنترنت (مثلاً GitHub Pages) لكي تعمل الكاميرا.\n\nبديل: أدخل رقم اللوحة يدوياً:", "9012 RYD");
+                let manualPlate = prompt("الكاميرا تحتاج إلى رفع الملف على الإنترنت لتعمل.\n\nكبديل مؤقت، أدخل رقم لوحة الشاحنة مباشرة هنا:", "9012 RYD");
                 if (manualPlate) processScanData(manualPlate);
                 return;
             }
@@ -327,33 +398,23 @@
             document.getElementById('qr-modal').classList.remove('hidden');
             document.getElementById('camera-error').classList.add('hidden');
             
-            // تهيئة الكاميرا إذا لم تكن مهيأة مسبقاً
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("reader");
             }
 
-            // إجبار المتصفح على تشغيل الكاميرا الخلفية (environment)
             html5QrCode.start(
                 { facingMode: "environment" }, 
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0
-                },
-                onScanSuccess,
-                onScanFailure
+                { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+                onScanSuccess, onScanFailure
             ).catch((err) => {
                 document.getElementById('camera-error').classList.remove('hidden');
-                console.error("Camera Start Error:", err);
             });
         }
 
         function closeQRCamera() {
             document.getElementById('qr-modal').classList.add('hidden');
             if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode.clear();
-                }).catch(err => console.error("Camera Stop Error:", err));
+                html5QrCode.stop().then(() => html5QrCode.clear());
             }
         }
 
@@ -364,22 +425,20 @@
                 emptyLoader.plate = decodedText.substring(0, 10).toUpperCase();
                 emptyLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
                 renderLoaders();
-                alert(`تم المسح بنجاح!\nبيانات: ${emptyLoader.plate}\nالرافعة المخصصة: L-${emptyLoader.id}`);
+                alert(`تم المسح بنجاح!\nاللوحة: ${emptyLoader.plate}\nالرافعة: L-${emptyLoader.id}`);
             } else {
                 alert('الرمز صحيح، لكن جميع الرافعات الـ 8 مشغولة حالياً!');
             }
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            closeQRCamera(); // إغلاق الكاميرا فور التقاط الرمز
+        function onScanSuccess(decodedText) {
+            closeQRCamera();
             processScanData(decodedText);
         }
 
-        function onScanFailure(error) {
-            // تجاهل أخطاء البحث عن الكود أثناء تحريك الكاميرا
-        }
+        function onScanFailure() {}
 
-        // --- التحكم اليدوي ---
+        // --- التحكم اليدوي وإنهاء التحميل ---
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
             let p = prompt("أدخل رقم لوحة الشاحنة لبدء التحميل:", "4821 BDR");
@@ -393,17 +452,38 @@
 
         function stopLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
+            const endTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+            const operatorName = document.getElementById('operatorSelect').value;
+            const currentTons = +(ldr.bags * 0.05).toFixed(2);
+
+            // حفظ السجل في المصفوفة
+            completedRecordsList.push({
+                loaderId: ldr.id,
+                plate: ldr.plate,
+                bags: ldr.bags,
+                tons: currentTons,
+                startTime: ldr.startTime,
+                endTime: endTime,
+                operator: operatorName
+            });
+
+            // تحديث الإحصائيات (KPIs)
             ldr.isActive = false;
             kpi.completed++;
             kpi.bags += ldr.bags;
-            kpi.tons += (ldr.bags * 0.05);
+            kpi.tons += currentTons;
+            
             document.getElementById('kpi-completed').innerText = kpi.completed;
             document.getElementById('kpi-bags').innerText = kpi.bags;
             document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-400 font-normal">MT</span>`;
+            
+            // إعادة رسم الواجهة
             renderLoaders();
+            renderRecordsTable();
         }
 
         renderLoaders();
+        renderRecordsTable();
     </script>
 </body>
 </html>
