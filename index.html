@@ -6,7 +6,6 @@
     <title>SPCC Tahama - Auto Loader System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- مكتبة الكاميرا المستقرة -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
@@ -51,9 +50,8 @@
 
     <main class="max-w-5xl mx-auto p-4 space-y-4">
         
-        <!-- ==================== التبويب 1: الرئيسية ==================== -->
+        <!-- التبويب 1: الرئيسية -->
         <div id="tab-home" class="tab-content block space-y-4">
-            
             <div class="glass-card rounded-2xl p-4 shadow-md text-white flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-user-circle text-2xl text-emerald-400"></i>
@@ -111,7 +109,7 @@
 
             <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/40 transition flex items-center justify-center gap-3">
                 <i class="fa-solid fa-qrcode text-2xl"></i>
-                <span class="lang-ar">مسح الرمز (QR) بالكاميرا الخلفية</span>
+                <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR)</span>
                 <span class="lang-en">OPEN CAMERA & SCAN QR</span>
             </button>
 
@@ -125,7 +123,7 @@
             </div>
         </div>
 
-        <!-- ==================== التبويب 2: السجلات ==================== -->
+        <!-- التبويب 2: السجلات -->
         <div id="tab-records" class="tab-content hidden space-y-4">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-white flex items-center gap-2">
@@ -140,7 +138,7 @@
             <div id="records-list" class="space-y-3"></div>
         </div>
 
-        <!-- ==================== التبويب 3: التقارير ==================== -->
+        <!-- التبويب 3: التقارير -->
         <div id="tab-reports" class="tab-content hidden space-y-4">
             <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
                 <i class="fa-solid fa-chart-pie text-emerald-400"></i>
@@ -152,7 +150,7 @@
             </div>
         </div>
 
-        <!-- ==================== التبويب 4: المزيد ==================== -->
+        <!-- التبويب 4: المزيد -->
         <div id="tab-more" class="tab-content hidden space-y-4">
             <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
                 <i class="fa-solid fa-ellipsis text-emerald-400"></i>
@@ -205,59 +203,41 @@
         </div>
     </nav>
 
-    <!-- الأكواد البرمجية للتشغيل -->
+    <!-- الأكواد البرمجية -->
     <script>
-        // 1. نظام التبويبات
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('block'); el.classList.add('hidden');
-            });
+            document.querySelectorAll('.tab-content').forEach(el => { el.classList.remove('block'); el.classList.add('hidden'); });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('tab-' + tabId).classList.add('block');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-emerald-400', 'font-bold');
-                btn.classList.add('text-slate-400', 'hover:text-slate-200');
-            });
+            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-emerald-400', 'font-bold'); btn.classList.add('text-slate-400', 'hover:text-slate-200'); });
             const activeBtn = document.getElementById('nav-' + tabId);
-            activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200');
-            activeBtn.classList.add('text-emerald-400', 'font-bold');
+            activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200'); activeBtn.classList.add('text-emerald-400', 'font-bold');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 2. اللغة والوقت
         function toggleLanguage() {
             const htmlTag = document.getElementById('html-root');
-            if (htmlTag.getAttribute('dir') === 'rtl') {
-                htmlTag.setAttribute('dir', 'ltr'); htmlTag.setAttribute('lang', 'en');
-            } else {
-                htmlTag.setAttribute('dir', 'rtl'); htmlTag.setAttribute('lang', 'ar');
-            }
-            renderLoaders();
-            renderRecordsTable();
+            if (htmlTag.getAttribute('dir') === 'rtl') { htmlTag.setAttribute('dir', 'ltr'); htmlTag.setAttribute('lang', 'en'); } 
+            else { htmlTag.setAttribute('dir', 'rtl'); htmlTag.setAttribute('lang', 'ar'); }
+            renderLoaders(); renderRecordsTable();
         }
 
         function updateClock() {
             const now = new Date();
             document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
             document.getElementById('live-date').innerText = now.toISOString().split('T')[0];
-            const hours = now.getHours();
-            let shift = 'A';
-            if (hours >= 15 && hours < 23) shift = 'B';
-            else if (hours >= 23 || hours < 6) shift = 'C';
+            const hours = now.getHours(); let shift = 'A';
+            if (hours >= 15 && hours < 23) shift = 'B'; else if (hours >= 23 || hours < 6) shift = 'C';
             document.getElementById('shift-badge').innerText = 'Shift ' + shift;
         }
-        setInterval(updateClock, 1000); 
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
 
-        // 3. حالة النظام (الرافعات والسجلات)
         let loadersData = Array.from({length: 8}, (_, i) => ({
             id: i + 1, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
         }));
         let kpi = { completed: 0, bags: 0, tons: 0 };
         let completedRecordsList = [];
 
-        // 4. رسم الرافعات
         function renderLoaders() {
             const container = document.getElementById('loaders-container');
             container.innerHTML = '';
@@ -271,7 +251,7 @@
                         <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="font-bold text-sm text-white">L-${ldr.id} <span class="text-[10px] text-slate-400">(Bay ${ldr.id})</span></span>
+                                <span class="font-bold text-sm text-white">L-${ldr.id} <span class="text-[10px] text-amber-300">(Tahama-Bay ${ldr.id})</span></span>
                             </div>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                                 ${isAr ? 'قيد التحميل' : 'IN PROGRESS'}
@@ -317,7 +297,6 @@
             document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
         }
 
-        // 5. رسم السجلات والإيميل
         function renderRecordsTable() {
             const listContainer = document.getElementById('records-list');
             const isAr = document.getElementById('html-root').getAttribute('dir') === 'rtl';
@@ -337,7 +316,7 @@
                 <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2">
                     <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
                         <span class="font-bold text-base text-white tracking-wider">${rec.plate}</span>
-                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">L-${rec.loaderId} (Bay ${rec.loaderId})</span>
+                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">L-${rec.loaderId} (Tahama-Bay ${rec.loaderId})</span>
                     </div>
                     <div class="grid grid-cols-2 text-xs text-slate-400 gap-y-2 pt-1">
                         <div>${isAr ? 'المشغل:' : 'Op:'} <span class="text-white font-semibold">${rec.operator}</span></div>
@@ -351,51 +330,42 @@
         }
 
         function sendEmailReport() {
-            if (completedRecordsList.length === 0) {
-                alert("لا توجد سجلات مكتملة لإرسالها!"); return;
-            }
+            if (completedRecordsList.length === 0) { alert("لا توجد سجلات مكتملة لإرسالها!"); return; }
             let targetEmails = "admin@spcc.com.sa,packhouse@spcc.com.sa";
             let date = new Date().toISOString().split('T')[0];
             let subject = encodeURIComponent(`تقرير الشحنات المكتملة - مصنع تهامة (${date})`);
             let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
-            
             completedRecordsList.forEach((rec, index) => {
-                bodyText += `${index + 1}. الرافعة: L-${rec.loaderId} (Bay ${rec.loaderId}) | بوليصة/اللوحة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
+                bodyText += `${index + 1}. الرافعة: L-${rec.loaderId} (Tahama-Bay ${rec.loaderId}) | بوليصة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
             });
-            
             bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
             window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
         }
 
-        // 6. نظام الكاميرا الآمن (يفتح الكاميرا الخلفية مباشرة)
         let html5QrCode = null;
         let isCameraActive = false;
 
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
-                let manualData = prompt("تنبيه: المتصفح يمنع الكاميرا لأن الملف غير مرفوع على رابط HTTPS.\n\nكبديل مؤقت للتجربة، أدخل نص الباركود (مثال: Tahama-Bay 3 | DW25KQ):", "Tahama-Bay 3 | DW25KQ");
-                if (manualData) processScanData(manualData);
+                let manualData = prompt("تنبيه: المتصفح يمنع الكاميرا لأن الملف غير مرفوع على رابط HTTPS.\n\nأدخل رقم بوليصة الشحن (مثال: DW25KQ):", "DW25KQ");
+                if (manualData) askForLoaderAndStart(manualData);
                 return;
             }
 
             document.getElementById('qr-modal').classList.remove('hidden');
             document.getElementById('camera-error').classList.add('hidden');
             
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-            }
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
             html5QrCode.start(
                 { facingMode: "environment" }, 
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 function onScanSuccess(decodedText) {
                     closeQRCamera();
-                    processScanData(decodedText);
+                    askForLoaderAndStart(decodedText);
                 },
                 function onScanFailure(error) {}
-            ).then(() => {
-                isCameraActive = true;
-            }).catch((err) => {
+            ).then(() => { isCameraActive = true; }).catch((err) => {
                 document.getElementById('camera-error').classList.remove('hidden');
             });
         }
@@ -403,70 +373,50 @@
         function closeQRCamera() {
             document.getElementById('qr-modal').classList.add('hidden');
             if (html5QrCode && isCameraActive) {
-                html5QrCode.stop().then(() => {
-                    isCameraActive = false;
-                    html5QrCode.clear();
-                }).catch(err => console.error("Stop error:", err));
+                html5QrCode.stop().then(() => { isCameraActive = false; html5QrCode.clear(); }).catch(err => {});
             }
         }
 
-        // 7. معالجة الباركود المطورة (AI) للتعرف على Bay و Loader
-        function processScanData(decodedText) {
+        // الذكاء الاصطناعي المطور للتعرف على Tahama-Bay واستخراج الرقم بدقة
+        function askForLoaderAndStart(decodedText) {
+            let plate = decodedText.split(/[\n\r|,-]/)[0].trim() || "DW25KQ";
             let targetId = null;
-            let finalPlate = "";
 
-            // 1. الذكاء الاصطناعي: يبحث الآن عن كلمة Bay أو Loader أو L متبوعة برقم
-            let matchLoader = decodedText.match(/(?:bay|loader|L)\s*-?\s*([1-8])/i);
-            if (matchLoader) {
-                targetId = parseInt(matchLoader[1]);
+            // البحث عن كلمة Bay أو Tahama-Bay متبوعة برقم من 1 إلى 8
+            let bayMatch = decodedText.match(/(?:Tahama\s*-\s*Bay|Bay|Loader|L)\s*([1-8])/i);
+            if (bayMatch) {
+                targetId = parseInt(bayMatch[1]);
             }
-            
-            // 2. إذا كان الباركود يبدأ برقم مباشرة (مثل 3|DW25KQ)
+
+            // إذا لم يتم العثور على الرقم تلقائياً، تظهر النافذة لتطلب من المشغل تحديد الرافعة
             if (!targetId) {
-                let matchStart = decodedText.match(/^([1-8])[\s|,|-]/);
-                if (matchStart) {
-                    targetId = parseInt(matchStart[1]);
-                }
+                let input = prompt(`📷 تم مسح الباركود بنجاح!\nالبيانات: ${plate}\n\n👉 هذا الباركود لا يحتوي على رقم الرافعة (Tahama-Bay) بشكل واضح.\nالرجاء إدخال رقم الرافعة يدوياً (من 1 إلى 8):`, "3");
+                targetId = parseInt(input);
             }
 
-            // 3. إذا لم يجد كلمة Bay أو أي رقم، يسأل المشغل (بدون رقم افتراضي)
-            if (!targetId) {
-                let input = prompt(`الباركود: ${decodedText}\n\n⚠️ لم يتمكن النظام من إيجاد كلمة (Bay) أو رقم الرافعة داخل الرمز.\nالرجاء إدخال رقم الرافعة يدوياً (من 1 إلى 8):`, "");
-                if (input && !isNaN(input)) {
-                    targetId = parseInt(input.trim());
-                }
-            }
-
-            if (!targetId || targetId < 1 || targetId > 8) {
-                alert("رقم الرافعة غير صحيح أو تم الإلغاء.");
+            if (isNaN(targetId) || targetId < 1 || targetId > 8) {
+                alert("❌ رقم الرافعة غير صحيح. تم إلغاء العملية.");
                 return;
             }
 
             let targetLoader = loadersData.find(l => l.id === targetId);
             if (targetLoader.isActive) {
-                alert(`عذراً، الرافعة L-${targetId} مشغولة حالياً! قم بإنهاء تحميلها أولاً.`);
+                alert(`⚠️ عذراً، الرافعة L-${targetId} (Tahama-Bay ${targetId}) مشغولة حالياً!`);
                 return;
             }
 
-            // استخراج بوليصة الشحن (DW25KQ) من النص
-            finalPlate = decodedText.split(/[\n\r|,-]/)[0].replace(/(?:bay|loader|L)\s*-?\s*[1-8]/i, '').trim();
-            if(!finalPlate || finalPlate.length < 2) {
-                finalPlate = decodedText.substring(0, 10).trim();
-            }
-
             targetLoader.isActive = true;
-            targetLoader.plate = finalPlate.toUpperCase();
+            targetLoader.plate = plate.toUpperCase();
             targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
-            
-            // استخراج عدد الأكياس إذا كان موجود في الباركود
+
+            // استخراج الأكياس (600) إذا وجدت في الباركود
             let bagsMatch = decodedText.match(/([0-9]{3,4})\s*bags?/i);
-            if(bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
+            if (bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
 
             renderLoaders();
-            alert(`✅ تم المسح بنجاح!\nالبوليصة: ${targetLoader.plate}\nتوجيه الشاحنة إلى: L-${targetId} (Bay ${targetId})`);
+            alert(`✅ تم توجيه الشاحنة ${targetLoader.plate} بنجاح إلى Tahama-Bay ${targetId} (L-${targetId})!`);
         }
 
-        // 8. التحكم اليدوي وإنهاء التحميل
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
             let p = prompt(`أدخل بوليصة أو رقم لوحة الشاحنة للرافعة L-${id}:`, "DW25KQ");
@@ -499,7 +449,6 @@
             renderLoaders(); renderRecordsTable();
         }
 
-        // تشغيل مبدئي
         renderLoaders();
         renderRecordsTable();
     </script>
