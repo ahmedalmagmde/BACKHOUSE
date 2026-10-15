@@ -348,7 +348,7 @@
         function safeOpenQRCamera() {
             if (window.isSecureContext === false) {
                 let manualData = prompt("أدخل رقم بوليصة الشحن (مثل DW25KQ):", "DW25KQ");
-                if (manualData) processScanData(manualData);
+                if (manualData) askForLoaderAndStart(manualData);
                 return;
             }
 
@@ -362,7 +362,7 @@
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 function onScanSuccess(decodedText) {
                     closeQRCamera();
-                    processScanData(decodedText);
+                    askForLoaderAndStart(decodedText);
                 },
                 function onScanFailure(error) {}
             ).then(() => { isCameraActive = true; }).catch((err) => {
@@ -377,33 +377,28 @@
             }
         }
 
-        // استخراج رقم البوليصة (مثل DW25KQ) ورقم الرافعة بشكل دقيق جداً من الفاتورة
-        function processScanData(decodedText) {
-            // استخراج بوليصة الشحن (مثل DW25KQ الواقعة في أعلى الفاتورة)
-            let plate = "DW25KQ"; // قيمة افتراضية مبدئية بناءً على فاتورتك
+        // نافذة التأكيد السريعة لتحديد رقم الرافعة الصحيح (من 1 إلى 8) عند مسح أي باركود
+        function askForLoaderAndStart(decodedText) {
+            let plate = "DW25KQ";
             let matchPlate = decodedText.match(/([A-Z0-9]{5,8})/);
-            if (matchPlate) {
-                plate = matchPlate[1];
-            } else if (decodedText.length > 2) {
-                plate = decodedText.substring(0, 10).trim();
-            }
+            if (matchPlate) plate = matchPlate[1];
+            else if (decodedText.length > 2) plate = decodedText.substring(0, 10).trim();
 
-            let targetId = 3; // افتراضي بناءً على فاتورتك (Tahama-Bay 3)
-            
-            // البحث عن رقم الرافعة بجانب كلمة Bay أو Tahama
-            let bayMatch = decodedText.match(/(?:bay|loader|L)\s*([1-8])/i) || decodedText.match(/([1-8])/);
-            if (bayMatch) {
-                targetId = parseInt(bayMatch[1]);
+            // نافذة تسأل المشغل عن رقم الرافعة وتفتح لوحة المفاتيح لتكتبه (مثلاً 8)
+            let input = prompt(`📷 تم مسح الباركود بنجاح!\nبوليصة الشحن: ${plate}\n\n👉 أين تريد توجيه الشاحنة؟\nالرجاء إدخال رقم الرافعة (من 1 إلى 8):`, "3");
+
+            if (input === null) return; // إذا ضغط إلغاء
+
+            let targetId = parseInt(input.trim());
+
+            if (isNaN(targetId) || targetId < 1 || targetId > 8) {
+                alert("❌ رقم غير صحيح. يرجى إدخال رقم بين 1 و 8 فقط.");
+                return;
             }
 
             let targetLoader = loadersData.find(l => l.id === targetId);
-            
-            if (!targetLoader || targetLoader.isActive) {
-                targetLoader = loadersData.find(l => !l.isActive);
-            }
-
-            if (!targetLoader) {
-                alert("⚠️ جميع الرافعات الـ 8 مشغولة حالياً!");
+            if (targetLoader.isActive) {
+                alert(`⚠️ عذراً، الرافعة Tahama-Bay ${targetId} مشغولة حالياً!`);
                 return;
             }
 
@@ -411,15 +406,12 @@
             targetLoader.plate = plate.toUpperCase();
             targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
 
-            // استخراج عدد الأكياس (600) تلقائياً من الفاتورة
             let bagsMatch = decodedText.match(/([0-9]{3,4})\s*bags?/i);
-            if (bagsMatch) {
-                targetLoader.bags = parseInt(bagsMatch[1]);
-            } else {
-                targetLoader.bags = 600; // القيمة الثابتة في فاتورتك
-            }
+            if (bagsMatch) targetLoader.bags = parseInt(bagsMatch[1]);
+            else targetLoader.bags = 600;
 
             renderLoaders();
+            alert(`✅ تم توجيه الشاحنة بنجاح إلى Tahama-Bay ${targetId}!`);
         }
 
         function startLoader(id) {
