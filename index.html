@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SPCC Tahama - Auto Loader System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة الكاميرا -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { background-color: #0B1528; color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
+        html[dir="ltr"] body { font-family: 'Inter', sans-serif; }
+        html[dir="rtl"] .lang-en { display: none; }
+        html[dir="ltr"] .lang-ar { display: none; }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .glass-card { background: #0F1E36; border: 1px solid #1E2E4A; }
+    </style>
+</head>
+<body class="pb-24 antialiased transition-all duration-300">
+
+    <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-b from-[#FBB03B] to-[#E58014] flex items-center justify-center font-black text-slate-950 shadow-lg text-base border border-[#FBB03B]/50 tracking-tighter">
+                    SPCC
+                </div>
+                <div class="leading-tight mt-1">
+                    <h1 class="font-extrabold text-[15px] tracking-wide text-white lang-ar">أسمنت المنطقة الجنوبية</h1>
+                    <h1 class="font-extrabold text-[14px] tracking-wide text-white lang-en">SOUTHERN PROVINCE CEMENT</h1>
+                    <div class="text-[11px] font-bold flex items-center gap-1 mt-0.5">
+                        <span class="text-[#FBB03B] lang-ar">مصنع تهامة |</span>
+                        <span class="text-[#FBB03B] lang-en">Tahama Plant |</span>
+                        <span class="text-slate-400 lang-ar">نظام التحميل الآلي</span>
+                        <span class="text-slate-400 lang-en">Auto Loader System</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 font-mono text-[11px]">
+                    <i class="fa-regular fa-clock text-[#FBB03B]"></i>
+                    <span id="live-time">00:00:00</span>
+                </div>
+                <button onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded-xl text-xs font-bold border border-slate-700 transition">
+                    <i class="fa-solid fa-globe"></i> <span class="lang-ar">EN</span><span class="lang-en">AR</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-4 space-y-4">
+        <div class="glass-card rounded-2xl p-4 shadow-md text-white flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-user-circle text-2xl text-emerald-400"></i>
+                <div>
+                    <div class="text-[11px] text-slate-400 lang-ar">المشغل الحالي:</div>
+                    <div class="text-[11px] text-slate-400 lang-en">Operator:</div>
+                    <div class="font-bold text-sm text-white">Ahmed Al-Ghamdi</div>
+                </div>
+            </div>
+            <div class="text-end">
+                <span id="shift-badge" class="px-3 py-1 rounded-full border text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
+                    Shift A
+                </span>
+                <div class="text-[10px] text-slate-400 mt-1" id="live-date">--/--/----</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="glass-card p-3 rounded-xl shadow-sm">
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span class="font-medium lang-ar">الرافعات النشطة</span><span class="font-medium lang-en">Active</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mt-1"></span>
+                </div>
+                <div class="text-xl font-black text-white mt-1" id="kpi-active">0 <span class="text-xs text-slate-400 font-normal">/ 8</span></div>
+            </div>
+            <div class="glass-card p-3 rounded-xl shadow-sm">
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span class="font-medium lang-ar">المكتملة</span><span class="font-medium lang-en">Completed</span>
+                    <i class="fa-solid fa-check-circle text-emerald-400"></i>
+                </div>
+                <div class="text-xl font-black text-emerald-400 mt-1" id="kpi-completed">0</div>
+            </div>
+            <div class="glass-card p-3 rounded-xl shadow-sm">
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span class="font-medium lang-ar">الأكياس</span><span class="font-medium lang-en">Bags</span>
+                    <i class="fa-solid fa-box text-sky-400"></i>
+                </div>
+                <div class="text-xl font-black text-sky-300 mt-1" id="kpi-bags">0</div>
+            </div>
+            <div class="glass-card p-3 rounded-xl shadow-sm">
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span class="font-medium lang-ar">الأطنان</span><span class="font-medium lang-en">Tons</span>
+                    <i class="fa-solid fa-layer-group text-[#FBB03B]"></i>
+                </div>
+                <div class="text-xl font-black text-[#FBB03B] mt-1" id="kpi-tons">0 <span class="text-xs text-slate-400 font-normal">MT</span></div>
+            </div>
+        </div>
+
+        <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/40 transition flex items-center justify-center gap-3">
+            <i class="fa-solid fa-qrcode text-2xl"></i>
+            <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR CODE)</span>
+            <span class="lang-en">OPEN CAMERA & SCAN QR</span>
+        </button>
+
+        <div class="pt-2">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-list-check text-emerald-400"></i>
+                <span class="lang-ar">مراقبة الرافعات (1 - 8)</span>
+                <span class="lang-en">Loaders Monitor (1 - 8)</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
+        </div>
+    </main>
+
+    <!-- QR Camera Modal -->
+    <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-[#0F1E36] rounded-2xl border border-[#1E2E4A] overflow-hidden flex flex-col">
+            <div class="p-4 bg-[#0B1528] border-b border-[#1E2E4A] flex justify-between items-center">
+                <h3 class="text-white font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-emerald-400"></i>
+                    <span class="lang-ar">مسح الباركود</span><span class="lang-en">Scan Barcode</span>
+                </h3>
+                <button onclick="closeQRCamera()" class="text-slate-400 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg">
+                    إغلاق
+                </button>
+            </div>
+            <div class="p-4 bg-slate-900 relative">
+                <!-- نافذة الكاميرا -->
+                <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30"></div>
+                <div id="camera-error" class="hidden mt-4 p-3 bg-amber-500/10 border border-amber-500/40 rounded-xl text-amber-300 text-xs text-center leading-relaxed">
+                    متصفح الجوال يمنع تشغيل الكاميرا لأن الملف غير مرفوع على الإنترنت (HTTPS).<br>يرجى رفع الملف على استضافتك (مثل GitHub Pages) لكي تعمل الكاميرا تلقائياً.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 w-full bg-[#0B1528]/95 backdrop-blur-lg border-t border-[#1E2E4A] pb-safe z-40">
+        <div class="max-w-md mx-auto flex items-center justify-around h-16">
+            <button class="flex flex-col items-center text-emerald-400 font-bold w-16">
+                <i class="fa-solid fa-house text-lg mb-1"></i><span class="text-[10px] lang-ar">الرئيسية</span><span class="text-[10px] lang-en">Home</span>
+            </button>
+            <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 w-16">
+                <i class="fa-solid fa-clipboard-list text-lg mb-1"></i><span class="text-[10px] lang-ar">السجلات</span><span class="text-[10px] lang-en">Records</span>
+            </button>
+            <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 w-16">
+                <i class="fa-solid fa-chart-pie text-lg mb-1"></i><span class="text-[10px] lang-ar">التقارير</span><span class="text-[10px] lang-en">Reports</span>
+            </button>
+            <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 w-16">
+                <i class="fa-solid fa-ellipsis text-lg mb-1"></i><span class="text-[10px] lang-ar">المزيد</span><span class="text-[10px] lang-en">More</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        function toggleLanguage() {
+            const htmlTag = document.getElementById('html-root');
+            if (htmlTag.getAttribute('dir') === 'rtl') {
+                htmlTag.setAttribute('dir', 'ltr'); htmlTag.setAttribute('lang', 'en');
+            } else {
+                htmlTag.setAttribute('dir', 'rtl'); htmlTag.setAttribute('lang', 'ar');
+            }
+            renderLoaders();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('live-date').innerText = now.toISOString().split('T')[0];
+            const hours = now.getHours();
+            let shift = 'A';
+            if (hours >= 15 && hours < 23) shift = 'B';
+            else if (hours >= 23 || hours < 6) shift = 'C';
+            document.getElementById('shift-badge').innerText = 'Shift ' + shift;
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        let loadersData = Array.from({length: 8}, (_, i) => ({
+            id: i + 1, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
+        }));
+        let kpi = { completed: 0, bags: 0, tons: 0 };
+
+        function renderLoaders() {
+            const container = document.getElementById('loaders-container');
+            container.innerHTML = '';
+            let activeCount = 0;
+            const isAr = document.getElementById('html-root').getAttribute('dir') === 'rtl';
+
+            loadersData.forEach(ldr => {
+                if(ldr.isActive) activeCount++;
+                const cardHTML = ldr.isActive ? `
+                    <div class="rounded-2xl border border-emerald-500/60 bg-[#0E223D] shadow-lg overflow-hidden flex flex-col">
+                        <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="font-bold text-sm text-white">L-${ldr.id}</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                ${isAr ? 'قيد التحميل' : 'IN PROGRESS'}
+                            </span>
+                        </div>
+                        <div class="p-3 flex-1 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <div class="font-mono font-black text-base text-white">${ldr.plate}</div>
+                                <span class="text-[11px] font-bold px-2 py-1 rounded-lg border bg-emerald-500/15 text-emerald-400 border-emerald-500/30">${ldr.type}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5 bg-[#0B1528] p-2 rounded-xl text-xs">
+                                <div><span class="text-slate-400 block text-[10px]">${isAr ? 'الأكياس' : 'Bags'}</span><span class="font-bold">${ldr.bags}</span></div>
+                                <div><span class="text-slate-400 block text-[10px]">${isAr ? 'وقت البدء' : 'In Time'}</span><span class="font-mono">${ldr.startTime}</span></div>
+                            </div>
+                        </div>
+                        <div class="p-2 border-t border-[#1E2E4A]">
+                            <button onclick="stopLoader(${ldr.id})" class="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition">
+                                <i class="fa-solid fa-check-circle"></i> ${isAr ? 'إنهاء التحميل' : 'END LOADING'}
+                            </button>
+                        </div>
+                    </div>` : `
+                    <div class="rounded-2xl border border-[#1E2E4A]/80 bg-[#0B1528] overflow-hidden flex flex-col opacity-90">
+                        <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+                                <span class="font-bold text-sm text-white">L-${ldr.id}</span>
+                            </div>
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                                ${isAr ? 'جاهز' : 'IDLE'}
+                            </span>
+                        </div>
+                        <div class="p-4 flex-1 text-center text-slate-500 text-xs flex flex-col items-center justify-center">
+                            <p>${isAr ? 'الرافعة جاهزة' : 'Loader Ready'}</p>
+                        </div>
+                        <div class="p-2 border-t border-[#1E2E4A]">
+                            <button onclick="startLoader(${ldr.id})" class="w-full py-2 bg-[#132847] hover:bg-[#1a345b] text-slate-200 border border-[#233d66] text-xs font-semibold rounded-xl transition">
+                                <i class="fa-solid fa-keyboard text-emerald-400"></i> ${isAr ? 'إدخال اللوحة يدوياً' : 'MANUAL START'}
+                            </button>
+                        </div>
+                    </div>`;
+                container.innerHTML += cardHTML;
+            });
+            document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
+        }
+
+        // --- نظام كاميرا ذكي يتعرف على الحماية المتصفح ---
+        let html5QrcodeScanner = null;
+
+        function safeOpenQRCamera() {
+            // 1. التحقق مما إذا كان الرابط آمناً أم أنه ملقم محلي (file://)
+            if (window.isSecureContext === false) {
+                // إذا لم يكن آمناً، نطلب إدخال رقم اللوحة يدوياً بدلاً من انهيار الكاميرا
+                let manualPlate = prompt("الكاميرا تحتاج إلى رفع الملف على الإنترنت لتعمل.\n\nكبديل مؤقت، أدخل رقم لوحة الشاحنة مباشرة هنا:", "9012 RYD");
+                if (manualPlate) {
+                    processScanData(manualPlate);
+                }
+                return;
+            }
+
+            // 2. إذا كان الرابط آمناً، نفتح الكاميرا
+            document.getElementById('qr-modal').classList.remove('hidden');
+            document.getElementById('camera-error').classList.add('hidden');
+            
+            try {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            } catch(e) {
+                document.getElementById('camera-error').classList.remove('hidden');
+            }
+        }
+
+        function closeQRCamera() {
+            document.getElementById('qr-modal').classList.add('hidden');
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(error => console.error(error));
+            }
+        }
+
+        function processScanData(decodedText) {
+            let emptyLoader = loadersData.find(l => !l.isActive);
+            if(emptyLoader) {
+                emptyLoader.isActive = true;
+                emptyLoader.plate = decodedText.substring(0, 10).toUpperCase();
+                emptyLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+                renderLoaders();
+                alert(`تم مسح الرمز بنجاح!\nاللوحة/التصريح: ${emptyLoader.plate}\nتم ربطها بالرافعة: L-${emptyLoader.id}`);
+            } else {
+                alert('الرمز صحيح، لكن جميع الرافعات الـ 8 مشغولة حالياً!');
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            closeQRCamera();
+            processScanData(decodedText);
+        }
+
+        function onScanFailure(error) {
+            // تجاهل أخطاء عدم العثور على باركود لأن الكاميرا تبحث بشكل مستمر
+        }
+
+        function startLoader(id) {
+            const ldr = loadersData.find(l => l.id === id);
+            let p = prompt("أدخل رقم لوحة الشاحنة لبدء التحميل:", "4821 BDR");
+            if (p) {
+                ldr.isActive = true;
+                ldr.plate = p.toUpperCase();
+                ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+                renderLoaders();
+            }
+        }
+
+        function stopLoader(id) {
+            const ldr = loadersData.find(l => l.id === id);
+            ldr.isActive = false;
+            kpi.completed++;
+            kpi.bags += ldr.bags;
+            kpi.tons += (ldr.bags * 0.05);
+            document.getElementById('kpi-completed').innerText = kpi.completed;
+            document.getElementById('kpi-bags').innerText = kpi.bags;
+            document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-400 font-normal">MT</span>`;
+            renderLoaders();
+        }
+
+        renderLoaders();
+    </script>
+</body>
+</html>
