@@ -25,9 +25,9 @@
     <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-b from-[#FBB03B] to-[#E58014] flex items-center justify-center font-black text-slate-950 shadow-lg text-base border border-[#FBB03B]/50 tracking-tighter">
-                    SPCC
-                </div>
+                <!-- صورة الشعار المرفوعة -->
+                <img src="logo.png" alt="SPCC Logo" class="w-12 h-12 rounded-xl shadow-lg object-contain bg-white/5 p-0.5 border border-[#FBB03B]/30">
+                
                 <div class="leading-tight mt-1">
                     <h1 class="font-extrabold text-[15px] tracking-wide text-white lang-ar">أسمنت المنطقة الجنوبية</h1>
                     <h1 class="font-extrabold text-[14px] tracking-wide text-white lang-en">SOUTHERN PROVINCE CEMENT</h1>
@@ -52,76 +52,116 @@
     </header>
 
     <main class="max-w-5xl mx-auto p-4 space-y-4">
-        <div class="glass-card rounded-2xl p-4 shadow-md text-white flex justify-between items-center">
-            <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-user-circle text-2xl text-emerald-400"></i>
-                <div>
-                    <div class="text-[11px] text-slate-400 lang-ar">المشغل الحالي:</div>
-                    <div class="text-[11px] text-slate-400 lang-en">Operator:</div>
-                    <!-- قائمة المنسدلة لاختيار اسم المشغل -->
-                    <select id="operatorSelect" class="bg-transparent font-bold text-sm text-white focus:outline-none cursor-pointer border-b border-dashed border-slate-500 pb-0.5">
-                        <option class="text-slate-900" value="Ahmed Al-Ghamdi">Ahmed Al-Ghamdi</option>
-                        <option class="text-slate-900" value="Mohammed Al-Shehri">Mohammed Al-Shehri</option>
-                        <option class="text-slate-900" value="Saeed Al-Zahrani">Saeed Al-Zahrani</option>
-                        <option class="text-slate-900" value="Khalid Al-Asmari">Khalid Al-Asmari</option>
-                        <option class="text-slate-900" value="Fahad Al-Qarni">Fahad Al-Qarni</option>
-                        <option class="text-slate-900" value="Salem Al-Otaibi">Salem Al-Otaibi</option>
-                    </select>
+        
+        <!-- ==================== التبويب 1: الرئيسية ==================== -->
+        <div id="tab-home" class="tab-content block space-y-4">
+            <div class="glass-card rounded-2xl p-4 shadow-md text-white flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-user-circle text-2xl text-emerald-400"></i>
+                    <div>
+                        <div class="text-[11px] text-slate-400 lang-ar">المشغل الحالي:</div>
+                        <div class="text-[11px] text-slate-400 lang-en">Operator:</div>
+                        <select id="operatorSelect" class="bg-transparent font-bold text-sm text-white focus:outline-none cursor-pointer border-b border-dashed border-slate-500 pb-0.5">
+                            <option class="text-slate-900" value="Ahmed Al-Ghamdi">Ahmed Al-Ghamdi</option>
+                            <option class="text-slate-900" value="Mohammed Al-Shehri">Mohammed Al-Shehri</option>
+                            <option class="text-slate-900" value="Saeed Al-Zahrani">Saeed Al-Zahrani</option>
+                            <option class="text-slate-900" value="Khalid Al-Asmari">Khalid Al-Asmari</option>
+                            <option class="text-slate-900" value="Fahad Al-Qarni">Fahad Al-Qarni</option>
+                            <option class="text-slate-900" value="Salem Al-Otaibi">Salem Al-Otaibi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span id="shift-badge" class="px-3 py-1 rounded-full border text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
+                        Shift A
+                    </span>
+                    <div class="text-[10px] text-slate-400 mt-1" id="live-date">--/--/----</div>
                 </div>
             </div>
-            <div class="text-end">
-                <span id="shift-badge" class="px-3 py-1 rounded-full border text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
-                    Shift A
-                </span>
-                <div class="text-[10px] text-slate-400 mt-1" id="live-date">--/--/----</div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="glass-card p-3 rounded-xl shadow-sm">
+                    <div class="flex justify-between text-slate-400 text-[11px]">
+                        <span class="font-medium lang-ar">الرافعات النشطة</span><span class="font-medium lang-en">Active</span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mt-1"></span>
+                    </div>
+                    <div class="text-xl font-black text-white mt-1" id="kpi-active">0 <span class="text-xs text-slate-400 font-normal">/ 8</span></div>
+                </div>
+                <div class="glass-card p-3 rounded-xl shadow-sm">
+                    <div class="flex justify-between text-slate-400 text-[11px]">
+                        <span class="font-medium lang-ar">المكتملة</span><span class="font-medium lang-en">Completed</span>
+                        <i class="fa-solid fa-check-circle text-emerald-400"></i>
+                    </div>
+                    <div class="text-xl font-black text-emerald-400 mt-1" id="kpi-completed">0</div>
+                </div>
+                <div class="glass-card p-3 rounded-xl shadow-sm">
+                    <div class="flex justify-between text-slate-400 text-[11px]">
+                        <span class="font-medium lang-ar">الأكياس</span><span class="font-medium lang-en">Bags</span>
+                        <i class="fa-solid fa-box text-sky-400"></i>
+                    </div>
+                    <div class="text-xl font-black text-sky-300 mt-1" id="kpi-bags">0</div>
+                </div>
+                <div class="glass-card p-3 rounded-xl shadow-sm">
+                    <div class="flex justify-between text-slate-400 text-[11px]">
+                        <span class="font-medium lang-ar">الأطنان</span><span class="font-medium lang-en">Tons</span>
+                        <i class="fa-solid fa-layer-group text-[#FBB03B]"></i>
+                    </div>
+                    <div class="text-xl font-black text-[#FBB03B] mt-1" id="kpi-tons">0 <span class="text-xs text-slate-400 font-normal">MT</span></div>
+                </div>
+            </div>
+
+            <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/40 transition flex items-center justify-center gap-3">
+                <i class="fa-solid fa-qrcode text-2xl"></i>
+                <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR CODE)</span>
+                <span class="lang-en">OPEN CAMERA & SCAN QR</span>
+            </button>
+
+            <div class="pt-2">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-list-check text-emerald-400"></i>
+                    <span class="lang-ar">مراقبة الرافعات (1 - 8)</span>
+                    <span class="lang-en">Loaders Monitor (1 - 8)</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="glass-card p-3 rounded-xl shadow-sm">
-                <div class="flex justify-between text-slate-400 text-[11px]">
-                    <span class="font-medium lang-ar">الرافعات النشطة</span><span class="font-medium lang-en">Active</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mt-1"></span>
-                </div>
-                <div class="text-xl font-black text-white mt-1" id="kpi-active">0 <span class="text-xs text-slate-400 font-normal">/ 8</span></div>
-            </div>
-            <div class="glass-card p-3 rounded-xl shadow-sm">
-                <div class="flex justify-between text-slate-400 text-[11px]">
-                    <span class="font-medium lang-ar">المكتملة</span><span class="font-medium lang-en">Completed</span>
-                    <i class="fa-solid fa-check-circle text-emerald-400"></i>
-                </div>
-                <div class="text-xl font-black text-emerald-400 mt-1" id="kpi-completed">0</div>
-            </div>
-            <div class="glass-card p-3 rounded-xl shadow-sm">
-                <div class="flex justify-between text-slate-400 text-[11px]">
-                    <span class="font-medium lang-ar">الأكياس</span><span class="font-medium lang-en">Bags</span>
-                    <i class="fa-solid fa-box text-sky-400"></i>
-                </div>
-                <div class="text-xl font-black text-sky-300 mt-1" id="kpi-bags">0</div>
-            </div>
-            <div class="glass-card p-3 rounded-xl shadow-sm">
-                <div class="flex justify-between text-slate-400 text-[11px]">
-                    <span class="font-medium lang-ar">الأطنان</span><span class="font-medium lang-en">Tons</span>
-                    <i class="fa-solid fa-layer-group text-[#FBB03B]"></i>
-                </div>
-                <div class="text-xl font-black text-[#FBB03B] mt-1" id="kpi-tons">0 <span class="text-xs text-slate-400 font-normal">MT</span></div>
-            </div>
-        </div>
-
-        <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/40 transition flex items-center justify-center gap-3">
-            <i class="fa-solid fa-qrcode text-2xl"></i>
-            <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR CODE)</span>
-            <span class="lang-en">OPEN CAMERA & SCAN QR</span>
-        </button>
-
-        <div class="pt-2">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
-                <i class="fa-solid fa-list-check text-emerald-400"></i>
-                <span class="lang-ar">مراقبة الرافعات (1 - 8)</span>
-                <span class="lang-en">Loaders Monitor (1 - 8)</span>
+        <!-- ==================== التبويب 2: السجلات ==================== -->
+        <div id="tab-records" class="tab-content hidden space-y-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-clipboard-list text-emerald-400"></i>
+                <span class="lang-ar">السجلات اليومية</span><span class="lang-en">Daily Records</span>
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
+            <div class="glass-card p-6 rounded-2xl text-center">
+                <i class="fa-solid fa-database text-4xl text-slate-600 mb-3"></i>
+                <p class="text-slate-400 text-sm">صفحة السجلات قيد الإنشاء... ستظهر الشحنات المكتملة هنا.</p>
+            </div>
         </div>
+
+        <!-- ==================== التبويب 3: التقارير ==================== -->
+        <div id="tab-reports" class="tab-content hidden space-y-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+                <span class="lang-ar">تقارير الأداء</span><span class="lang-en">Performance Reports</span>
+            </h2>
+            <div class="glass-card p-6 rounded-2xl text-center">
+                <i class="fa-solid fa-chart-bar text-4xl text-slate-600 mb-3"></i>
+                <p class="text-slate-400 text-sm">صفحة التقارير والرسوم البيانية قيد الإنشاء...</p>
+            </div>
+        </div>
+
+        <!-- ==================== التبويب 4: المزيد ==================== -->
+        <div id="tab-more" class="tab-content hidden space-y-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-ellipsis text-emerald-400"></i>
+                <span class="lang-ar">إعدادات النظام</span><span class="lang-en">System Settings</span>
+            </h2>
+            <div class="glass-card p-6 rounded-2xl text-center">
+                <i class="fa-solid fa-cog text-4xl text-slate-600 mb-3"></i>
+                <p class="text-slate-400 text-sm">صفحة الإعدادات وتصدير البيانات قيد الإنشاء...</p>
+            </div>
+        </div>
+
     </main>
 
     <!-- QR Camera Modal -->
@@ -148,22 +188,43 @@
     <!-- Bottom Nav -->
     <nav class="fixed bottom-0 w-full bg-[#0B1528]/95 backdrop-blur-lg border-t border-[#1E2E4A] pb-safe z-40">
         <div class="max-w-md mx-auto flex items-center justify-around h-16">
-            <button class="flex flex-col items-center text-emerald-400 font-bold w-16">
+            <button id="nav-home" onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-emerald-400 font-bold w-16 transition">
                 <i class="fa-solid fa-house text-lg mb-1"></i><span class="text-[10px] lang-ar">الرئيسية</span><span class="text-[10px] lang-en">Home</span>
             </button>
-            <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 w-16">
+            <button id="nav-records" onclick="switchTab('records')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
                 <i class="fa-solid fa-clipboard-list text-lg mb-1"></i><span class="text-[10px] lang-ar">السجلات</span><span class="text-[10px] lang-en">Records</span>
             </button>
-            <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 w-16">
+            <button id="nav-reports" onclick="switchTab('reports')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
                 <i class="fa-solid fa-chart-pie text-lg mb-1"></i><span class="text-[10px] lang-ar">التقارير</span><span class="text-[10px] lang-en">Reports</span>
             </button>
-            <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 w-16">
+            <button id="nav-more" onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
                 <i class="fa-solid fa-ellipsis text-lg mb-1"></i><span class="text-[10px] lang-ar">المزيد</span><span class="text-[10px] lang-en">More</span>
             </button>
         </div>
     </nav>
 
     <script>
+        // --- نظام التبويبات ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('block');
+                el.classList.add('hidden');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('block');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-emerald-400', 'font-bold');
+                btn.classList.add('text-slate-400', 'hover:text-slate-200');
+            });
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200');
+            activeBtn.classList.add('text-emerald-400', 'font-bold');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- اللغة ---
         function toggleLanguage() {
             const htmlTag = document.getElementById('html-root');
             if (htmlTag.getAttribute('dir') === 'rtl') {
@@ -174,6 +235,7 @@
             renderLoaders();
         }
 
+        // --- الوقت والتاريخ ---
         function updateClock() {
             const now = new Date();
             document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
@@ -186,6 +248,7 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
+        // --- إدارة الرافعات ---
         let loadersData = Array.from({length: 8}, (_, i) => ({
             id: i + 1, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
         }));
@@ -250,6 +313,7 @@
             document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
         }
 
+        // --- نظام الكاميرا ---
         let html5QrcodeScanner = null;
 
         function safeOpenQRCamera() {
