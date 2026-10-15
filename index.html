@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SPCC Tahama - Auto Loader System</title>
+    <!-- مكتبات التصميم والأيقونات -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- مكتبة الكاميرا -->
+    <!-- مكتبة الكاميرا المستقرة -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
@@ -22,6 +23,7 @@
 </head>
 <body class="pb-24 antialiased transition-all duration-300">
 
+    <!-- الشريط العلوي -->
     <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -49,10 +51,13 @@
         </div>
     </header>
 
+    <!-- المحتوى الرئيسي -->
     <main class="max-w-5xl mx-auto p-4 space-y-4">
         
         <!-- ==================== التبويب 1: الرئيسية ==================== -->
         <div id="tab-home" class="tab-content block space-y-4">
+            
+            <!-- شريط المشغل والوردية -->
             <div class="glass-card rounded-2xl p-4 shadow-md text-white flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-user-circle text-2xl text-emerald-400"></i>
@@ -77,6 +82,7 @@
                 </div>
             </div>
 
+            <!-- بطاقات الإحصائيات -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="glass-card p-3 rounded-xl shadow-sm">
                     <div class="flex justify-between text-slate-400 text-[11px]">
@@ -108,19 +114,23 @@
                 </div>
             </div>
 
+            <!-- زر الكاميرا -->
             <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/40 transition flex items-center justify-center gap-3">
                 <i class="fa-solid fa-qrcode text-2xl"></i>
-                <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR CODE)</span>
+                <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR)</span>
                 <span class="lang-en">OPEN CAMERA & SCAN QR</span>
             </button>
 
+            <!-- منطقة الرافعات -->
             <div class="pt-2">
                 <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
                     <i class="fa-solid fa-list-check text-emerald-400"></i>
                     <span class="lang-ar">مراقبة الرافعات (1 - 8)</span>
                     <span class="lang-en">Loaders Monitor (1 - 8)</span>
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container">
+                    <!-- سيتم حقن الرافعات هنا عبر الجافاسكربت -->
+                </div>
             </div>
         </div>
 
@@ -133,14 +143,11 @@
                 </h2>
                 <button onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
                     <i class="fa-solid fa-envelope"></i>
-                    <span class="lang-ar">إرسال للإيميل</span><span class="lang-en">Email Report</span>
+                    <span class="lang-ar">إرسال تقرير</span><span class="lang-en">Email Report</span>
                 </button>
             </div>
             <div id="records-list" class="space-y-3">
-                <div class="glass-card p-6 rounded-2xl text-center">
-                    <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
-                    <p class="text-slate-400 text-sm lang-ar">لا توجد سجلات حالياً. قم بإنهاء تحميل شاحنة لتظهر هنا.</p>
-                </div>
+                <!-- سيتم حقن السجلات هنا -->
             </div>
         </div>
 
@@ -164,15 +171,331 @@
             </h2>
             <div class="glass-card p-6 rounded-2xl text-center">
                 <i class="fa-solid fa-cog text-4xl text-slate-600 mb-3"></i>
-                <p class="text-slate-400 text-sm">صفحة الإعدادات وتصدير البيانات قيد الإنشاء...</p>
+                <p class="text-slate-400 text-sm">صفحة الإعدادات قيد الإنشاء...</p>
             </div>
         </div>
 
     </main>
 
-    <!-- QR Camera Modal -->
+    <!-- نافذة الكاميرا -->
     <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-[#0F1E36] rounded-2xl border border-[#1E2E4A] overflow-hidden flex flex-col">
             <div class="p-4 bg-[#0B1528] border-b border-[#1E2E4A] flex justify-between items-center">
                 <h3 class="text-white font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-camera text
+                    <i class="fa-solid fa-camera text-emerald-400"></i>
+                    <span class="lang-ar">مسح الباركود</span><span class="lang-en">Scan Barcode</span>
+                </h3>
+                <button onclick="closeQRCamera()" class="text-slate-400 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg transition font-bold">
+                    إغلاق
+                </button>
+            </div>
+            <div class="p-4 bg-slate-900 relative">
+                <!-- عنصر قارئ الباركود الأساسي -->
+                <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black min-h-[250px]"></div>
+                <div id="camera-error" class="hidden mt-4 p-3 bg-amber-500/10 border border-amber-500/40 rounded-xl text-amber-300 text-xs text-center leading-relaxed">
+                    يرجى السماح باستخدام الكاميرا. إذا لم تعمل، استخدم الإدخال اليدوي.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط التنقل السفلي -->
+    <nav class="fixed bottom-0 w-full bg-[#0B1528]/95 backdrop-blur-lg border-t border-[#1E2E4A] pb-safe z-40">
+        <div class="max-w-md mx-auto flex items-center justify-around h-16">
+            <button id="nav-home" onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-emerald-400 font-bold w-16 transition">
+                <i class="fa-solid fa-house text-lg mb-1"></i><span class="text-[10px] lang-ar">الرئيسية</span><span class="text-[10px] lang-en">Home</span>
+            </button>
+            <button id="nav-records" onclick="switchTab('records')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
+                <i class="fa-solid fa-clipboard-list text-lg mb-1"></i><span class="text-[10px] lang-ar">السجلات</span><span class="text-[10px] lang-en">Records</span>
+            </button>
+            <button id="nav-reports" onclick="switchTab('reports')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
+                <i class="fa-solid fa-chart-pie text-lg mb-1"></i><span class="text-[10px] lang-ar">التقارير</span><span class="text-[10px] lang-en">Reports</span>
+            </button>
+            <button id="nav-more" onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-slate-400 hover:text-slate-200 w-16 transition">
+                <i class="fa-solid fa-ellipsis text-lg mb-1"></i><span class="text-[10px] lang-ar">المزيد</span><span class="text-[10px] lang-en">More</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- الأكواد البرمجية للتشغيل -->
+    <script>
+        // 1. نظام التبويبات
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('block'); el.classList.add('hidden');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('block');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-emerald-400', 'font-bold');
+                btn.classList.add('text-slate-400', 'hover:text-slate-200');
+            });
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200');
+            activeBtn.classList.add('text-emerald-400', 'font-bold');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 2. اللغة والوقت
+        function toggleLanguage() {
+            const htmlTag = document.getElementById('html-root');
+            if (htmlTag.getAttribute('dir') === 'rtl') {
+                htmlTag.setAttribute('dir', 'ltr'); htmlTag.setAttribute('lang', 'en');
+            } else {
+                htmlTag.setAttribute('dir', 'rtl'); htmlTag.setAttribute('lang', 'ar');
+            }
+            renderLoaders();
+            renderRecordsTable();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('live-date').innerText = now.toISOString().split('T')[0];
+            const hours = now.getHours();
+            let shift = 'A';
+            if (hours >= 15 && hours < 23) shift = 'B';
+            else if (hours >= 23 || hours < 6) shift = 'C';
+            document.getElementById('shift-badge').innerText = 'Shift ' + shift;
+        }
+        setInterval(updateClock, 1000); 
+        updateClock();
+
+        // 3. حالة النظام (الرافعات والسجلات)
+        let loadersData = Array.from({length: 8}, (_, i) => ({
+            id: i + 1, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null
+        }));
+        let kpi = { completed: 0, bags: 0, tons: 0 };
+        let completedRecordsList = [];
+
+        // 4. رسم الرافعات
+        function renderLoaders() {
+            const container = document.getElementById('loaders-container');
+            container.innerHTML = '';
+            let activeCount = 0;
+            const isAr = document.getElementById('html-root').getAttribute('dir') === 'rtl';
+
+            loadersData.forEach(ldr => {
+                if(ldr.isActive) activeCount++;
+                const cardHTML = ldr.isActive ? `
+                    <div class="rounded-2xl border border-emerald-500/60 bg-[#0E223D] shadow-lg overflow-hidden flex flex-col">
+                        <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="font-bold text-sm text-white">L-${ldr.id}</span>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                ${isAr ? 'قيد التحميل' : 'IN PROGRESS'}
+                            </span>
+                        </div>
+                        <div class="p-3 flex-1 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <div class="font-mono font-black text-base text-white">${ldr.plate}</div>
+                                <span class="text-[11px] font-bold px-2 py-1 rounded-lg border bg-emerald-500/15 text-emerald-400 border-emerald-500/30">${ldr.type}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5 bg-[#0B1528] p-2 rounded-xl text-xs">
+                                <div><span class="text-slate-400 block text-[10px]">${isAr ? 'الأكياس' : 'Bags'}</span><span class="font-bold text-white">${ldr.bags}</span></div>
+                                <div><span class="text-slate-400 block text-[10px]">${isAr ? 'وقت البدء' : 'In Time'}</span><span class="font-mono text-slate-200">${ldr.startTime}</span></div>
+                            </div>
+                        </div>
+                        <div class="p-2 border-t border-[#1E2E4A]">
+                            <button onclick="stopLoader(${ldr.id})" class="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition">
+                                <i class="fa-solid fa-check-circle"></i> ${isAr ? 'إنهاء التحميل' : 'END LOADING'}
+                            </button>
+                        </div>
+                    </div>` : `
+                    <div class="rounded-2xl border border-[#1E2E4A]/80 bg-[#0B1528] overflow-hidden flex flex-col opacity-90">
+                        <div class="p-3 border-b border-[#1E2E4A] flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+                                <span class="font-bold text-sm text-white">L-${ldr.id}</span>
+                            </div>
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                                ${isAr ? 'جاهز' : 'IDLE'}
+                            </span>
+                        </div>
+                        <div class="p-4 flex-1 text-center text-slate-500 text-xs flex flex-col items-center justify-center">
+                            <p>${isAr ? 'الرافعة جاهزة' : 'Loader Ready'}</p>
+                        </div>
+                        <div class="p-2 border-t border-[#1E2E4A]">
+                            <button onclick="startLoader(${ldr.id})" class="w-full py-2 bg-[#132847] hover:bg-[#1a345b] text-slate-200 border border-[#233d66] text-xs font-semibold rounded-xl transition">
+                                <i class="fa-solid fa-keyboard text-emerald-400"></i> ${isAr ? 'إدخال اللوحة يدوياً' : 'MANUAL START'}
+                            </button>
+                        </div>
+                    </div>`;
+                container.innerHTML += cardHTML;
+            });
+            document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
+        }
+
+        // 5. رسم السجلات والإيميل
+        function renderRecordsTable() {
+            const listContainer = document.getElementById('records-list');
+            const isAr = document.getElementById('html-root').getAttribute('dir') === 'rtl';
+
+            if (completedRecordsList.length === 0) {
+                listContainer.innerHTML = `
+                <div class="glass-card p-6 rounded-2xl text-center">
+                    <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
+                    <p class="text-slate-400 text-sm">${isAr ? 'لا توجد سجلات حالياً. قم بإنهاء تحميل شاحنة لتظهر هنا.' : 'No records yet. End a load to see it here.'}</p>
+                </div>`;
+                return;
+            }
+
+            let html = '';
+            [...completedRecordsList].reverse().forEach(rec => {
+                html += `
+                <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2">
+                    <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
+                        <span class="font-bold text-base text-white tracking-wider">${rec.plate}</span>
+                        <span class="text-xs font-bold bg-slate-800 text-slate-300 px-2 py-1 rounded">L-${rec.loaderId}</span>
+                    </div>
+                    <div class="grid grid-cols-2 text-xs text-slate-400 gap-y-2 pt-1">
+                        <div>${isAr ? 'المشغل:' : 'Op:'} <span class="text-white font-semibold">${rec.operator}</span></div>
+                        <div>${isAr ? 'الكمية:' : 'Qty:'} <span class="text-emerald-400 font-bold">${rec.bags} ${isAr ? 'كيس' : 'Bags'} (${rec.tons} MT)</span></div>
+                        <div>${isAr ? 'وقت البدء:' : 'In:'} <span class="text-white font-mono">${rec.startTime}</span></div>
+                        <div>${isAr ? 'وقت الانتهاء:' : 'Out:'} <span class="text-amber-400 font-mono">${rec.endTime}</span></div>
+                    </div>
+                </div>`;
+            });
+            listContainer.innerHTML = html;
+        }
+
+        function sendEmailReport() {
+            if (completedRecordsList.length === 0) {
+                alert("لا توجد سجلات مكتملة لإرسالها!"); return;
+            }
+            // إيميلات الإدارة (يمكنك تعديلها)
+            let targetEmails = "admin@spcc.com.sa,packhouse@spcc.com.sa";
+            let date = new Date().toISOString().split('T')[0];
+            let subject = encodeURIComponent(`تقرير الشحنات المكتملة - مصنع تهامة (${date})`);
+            let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
+            
+            completedRecordsList.forEach((rec, index) => {
+                bodyText += `${index + 1}. الرافعة: L-${rec.loaderId} | اللوحة: ${rec.plate} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
+            });
+            
+            bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
+            window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+        }
+
+        // 6. نظام الكاميرا الآمن
+        let html5QrcodeScanner = null;
+
+        function safeOpenQRCamera() {
+            if (window.isSecureContext === false) {
+                let manualData = prompt("المتصفح يمنع الكاميرا لأن الملف غير مرفوع على الإنترنت (GitHub).\n\nكبديل مؤقت، أدخل البيانات كالتالي (مثال: L8 4821 BDR):", "L8 4821 BDR");
+                if (manualData) processScanData(manualData);
+                return;
+            }
+
+            document.getElementById('qr-modal').classList.remove('hidden');
+            document.getElementById('camera-error').classList.add('hidden');
+            
+            try {
+                // نستخدم Html5QrcodeScanner لأنه الأكثر استقراراً مع المتصفحات
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            } catch(e) {
+                console.error("Camera Error:", e);
+                document.getElementById('camera-error').classList.remove('hidden');
+            }
+        }
+
+        function closeQRCamera() {
+            document.getElementById('qr-modal').classList.add('hidden');
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(error => console.error(error));
+            }
+        }
+
+        // 7. معالجة بيانات الباركود (الذكاء الاصطناعي لاختيار الرافعة)
+        function processScanData(decodedText) {
+            let targetId = null;
+            let finalPlate = decodedText;
+
+            // محاولة 1: استخراج رقم من الباركود (مثل L8 أو Loader 8)
+            let matchLoader = decodedText.match(/L\s*-?\s*([1-8])/i) || decodedText.match(/loader\s*-?\s*([1-8])/i);
+            if (matchLoader) targetId = parseInt(matchLoader[1]);
+            
+            // محاولة 2: إذا كان الباركود يبدأ برقم من 1-8 مباشرة (مثل: 8|4821BDR)
+            if (!targetId) {
+                let matchStart = decodedText.match(/^([1-8])[\s|,|-]/);
+                if (matchStart) targetId = parseInt(matchStart[1]);
+            }
+
+            // إذا لم يتم تحديد الرافعة، اسأل المشغل
+            if (!targetId) {
+                let input = prompt(`تم قراءة الرمز: ${decodedText}\n\nإلى أي رافعة تريد تعيين هذه الشاحنة؟ (من 1 إلى 8):`, "1");
+                targetId = parseInt(input);
+            }
+
+            if (!targetId || targetId < 1 || targetId > 8) {
+                alert("رقم الرافعة غير صحيح. تم الإلغاء.");
+                return;
+            }
+
+            let targetLoader = loadersData.find(l => l.id === targetId);
+            if (targetLoader.isActive) {
+                alert(`عذراً، الرافعة L-${targetId} مشغولة حالياً!`);
+                return;
+            }
+
+            // تنظيف النص ليكون رقم لوحة فقط
+            finalPlate = decodedText.replace(/L\s*-?\s*[1-8]/i, '').replace(/loader\s*-?\s*[1-8]/i, '').trim();
+
+            targetLoader.isActive = true;
+            targetLoader.plate = finalPlate.substring(0, 15).toUpperCase() || "TRUCK-" + Math.floor(Math.random() * 1000);
+            targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+            
+            renderLoaders();
+            alert(`تم المسح بنجاح!\nتوجيه الشاحنة إلى الرافعة: L-${targetId}`);
+        }
+
+        function onScanSuccess(decodedText) {
+            closeQRCamera();
+            processScanData(decodedText);
+        }
+
+        function onScanFailure() {}
+
+        // 8. التحكم اليدوي
+        function startLoader(id) {
+            const ldr = loadersData.find(l => l.id === id);
+            let p = prompt("أدخل رقم لوحة الشاحنة لبدء التحميل:", "4821 BDR");
+            if (p) {
+                ldr.isActive = true;
+                ldr.plate = p.toUpperCase();
+                ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+                renderLoaders();
+            }
+        }
+
+        function stopLoader(id) {
+            const ldr = loadersData.find(l => l.id === id);
+            const endTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
+            const operatorName = document.getElementById('operatorSelect').value;
+            const currentTons = +(ldr.bags * 0.05).toFixed(2);
+
+            completedRecordsList.push({
+                loaderId: ldr.id, plate: ldr.plate, bags: ldr.bags, tons: currentTons,
+                startTime: ldr.startTime, endTime: endTime, operator: operatorName
+            });
+
+            ldr.isActive = false;
+            kpi.completed++; kpi.bags += ldr.bags; kpi.tons += currentTons;
+            
+            document.getElementById('kpi-completed').innerText = kpi.completed;
+            document.getElementById('kpi-bags').innerText = kpi.bags;
+            document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-400 font-normal">MT</span>`;
+            
+            renderLoaders(); renderRecordsTable();
+        }
+
+        // تشغيل مبدئي
+        renderLoaders();
+        renderRecordsTable();
+    </script>
+</body>
+</html>
