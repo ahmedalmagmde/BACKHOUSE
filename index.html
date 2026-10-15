@@ -58,7 +58,15 @@
                 <div>
                     <div class="text-[11px] text-slate-400 lang-ar">المشغل الحالي:</div>
                     <div class="text-[11px] text-slate-400 lang-en">Operator:</div>
-                    <div class="font-bold text-sm text-white">Ahmed Al-Ghamdi</div>
+                    <!-- قائمة المنسدلة لاختيار اسم المشغل -->
+                    <select id="operatorSelect" class="bg-transparent font-bold text-sm text-white focus:outline-none cursor-pointer border-b border-dashed border-slate-500 pb-0.5">
+                        <option class="text-slate-900" value="Ahmed Al-Ghamdi">Ahmed Al-Ghamdi</option>
+                        <option class="text-slate-900" value="Mohammed Al-Shehri">Mohammed Al-Shehri</option>
+                        <option class="text-slate-900" value="Saeed Al-Zahrani">Saeed Al-Zahrani</option>
+                        <option class="text-slate-900" value="Khalid Al-Asmari">Khalid Al-Asmari</option>
+                        <option class="text-slate-900" value="Fahad Al-Qarni">Fahad Al-Qarni</option>
+                        <option class="text-slate-900" value="Salem Al-Otaibi">Salem Al-Otaibi</option>
+                    </select>
                 </div>
             </div>
             <div class="text-end">
@@ -129,7 +137,6 @@
                 </button>
             </div>
             <div class="p-4 bg-slate-900 relative">
-                <!-- نافذة الكاميرا -->
                 <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30"></div>
                 <div id="camera-error" class="hidden mt-4 p-3 bg-amber-500/10 border border-amber-500/40 rounded-xl text-amber-300 text-xs text-center leading-relaxed">
                     متصفح الجوال يمنع تشغيل الكاميرا لأن الملف غير مرفوع على الإنترنت (HTTPS).<br>يرجى رفع الملف على استضافتك (مثل GitHub Pages) لكي تعمل الكاميرا تلقائياً.
@@ -243,21 +250,17 @@
             document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-400 font-normal">/ 8</span>`;
         }
 
-        // --- نظام كاميرا ذكي يتعرف على الحماية المتصفح ---
         let html5QrcodeScanner = null;
 
         function safeOpenQRCamera() {
-            // 1. التحقق مما إذا كان الرابط آمناً أم أنه ملقم محلي (file://)
             if (window.isSecureContext === false) {
-                // إذا لم يكن آمناً، نطلب إدخال رقم اللوحة يدوياً بدلاً من انهيار الكاميرا
-                let manualPlate = prompt("الكاميرا تحتاج إلى رفع الملف على الإنترنت لتعمل.\n\nكبديل مؤقت، أدخل رقم لوحة الشاحنة مباشرة هنا:", "9012 RYD");
+                let manualPlate = prompt("الكاميرا تحتاج إلى رفع الملف على الإنترنت (GitHub) لتعمل.\n\nكبديل مؤقت، أدخل رقم لوحة الشاحنة مباشرة هنا:", "9012 RYD");
                 if (manualPlate) {
                     processScanData(manualPlate);
                 }
                 return;
             }
 
-            // 2. إذا كان الرابط آمناً، نفتح الكاميرا
             document.getElementById('qr-modal').classList.remove('hidden');
             document.getElementById('camera-error').classList.add('hidden');
             
@@ -295,9 +298,7 @@
             processScanData(decodedText);
         }
 
-        function onScanFailure(error) {
-            // تجاهل أخطاء عدم العثور على باركود لأن الكاميرا تبحث بشكل مستمر
-        }
+        function onScanFailure(error) {}
 
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
