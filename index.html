@@ -153,6 +153,7 @@
                     </button>
                 </div>
             </div>
+            <div id="cloud-status" class="text-[11px] text-slate-500 dark:text-slate-400 hidden"></div>
             <div id="records-list" class="space-y-3"></div>
         </div>
 
@@ -177,12 +178,15 @@
             <div class="glass-card p-4 rounded-2xl space-y-3">
                 <label class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-envelope text-emerald-500"></i>
-                    <span class="lang-ar">إعدادات إرسال التقرير</span><span class="lang-en">Report Sending</span>
+                    <span class="lang-ar">الربط مع Google (الحفظ + الإيميل)</span><span class="lang-en">Google Link (Sheet + Email)</span>
                 </label>
                 <input id="send-url" type="url" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="https://script.google.com/macros/s/.../exec">
                 <input id="send-key" type="text" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="Secret Key">
                 <button onclick="saveSendSettings()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl transition">
                     <span class="lang-ar">حفظ</span><span class="lang-en">Save</span>
+                </button>
+                <button onclick="testConnection()" class="w-full py-2.5 bg-slate-100 dark:bg-[#132847] dark:text-slate-200 text-slate-800 border border-slate-300 dark:border-[#233d66] font-bold text-sm rounded-xl transition">
+                    <span class="lang-ar">اختبار الاتصال</span><span class="lang-en">Test Connection</span>
                 </button>
             </div>
         </div>
@@ -451,15 +455,121 @@
             const key = document.getElementById('send-key').value.trim();
             if (url && !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) { alert('❌ الرابط غير صحيح، لازم ينتهي بـ /exec'); return; }
             try { localStorage.setItem('spcc_send_url', url); localStorage.setItem('spcc_send_key', key); } catch (e) {}
-            alert('✅ تم حفظ إعدادات الإرسال');
+            alert('✅ تم حفظ إعدادات الربط');
+            seedCloud();
+            pullRecords();
+        }
+
+        // ===== المزامنة مع Google Sheet =====
+        function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+        function cloudUrl() { return getSetting('spcc_send_url'); }
+        function getPending() { try { return JSON.parse(localStorage.getItem('spcc_pending') || '[]'); } catch (e) { return []; } }
+        function setPending(a) { try { localStorage.setItem('spcc_pending', JSON.stringify(a)); } catch (e) {} }
+
+        function setCloudStatus(ok, sheetUrl) {
+            const el = document.getElementById('cloud-status');
+            if (!el) return;
+            if (!cloudUrl()) { el.classList.add('hidden'); return; }
+            el.classList.remove('hidden');
+            el.innerHTML = ok
+                ? '☁️ السجلات محفوظة في Google Sheet' + (sheetUrl ? ` — <a href="${sheetUrl}" target="_blank" class="text-emerald-500 underline">فتح الجدول</a>` : '')
+                : '⚠️ لا يوجد اتصال الآن، السجلات محفوظة على الجهاز وتُرسل تلقائياً لاحقاً';
+        }
+
+        async function cloudPost(payload) {
+            const res = await fetch(cloudUrl(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(Object.assign({ key: getSetting('spcc_send_key') }, payload))
+            });
+            const txt = await res.text();
+            try { return JSON.parse(txt); } catch (e) { throw new Error('NOT_JSON'); }
+        }
+
+        function explainError(e) {
+            if (e && e.message === 'NOT_JSON')
+                return 'الرابط رد بصفحة بدل البيانات. غالباً الكود ما انحفظ كنسخة جديدة (New version) أو ما أُعطيت الصلاحيات (شغّل setup).';
+            return 'المتصفح ما قدر يوصل للرابط. غالباً خيار Who has access ليس Anyone، أو الرابط ناقص/غلط، أو ما فيه إنترنت.';
+        }
+
+        async function testConnection() {
+            const url = cloudUrl();
+            if (!url) { alert('الصق رابط الـ /exec واضغط حفظ أولاً'); return; }
+            try {
+                const res = await fetch(url + '?action=list&key=' + encodeURIComponent(getSetting('spcc_send_key')));
+                const txt = await res.text();
+                let out; try { out = JSON.parse(txt); } catch (e) { throw new Error('NOT_JSON'); }
+                if (out.ok) alert('✅ الاتصال سليم. عدد السجلات في الجدول: ' + out.records.length);
+                else if (out.error === 'unauthorized') alert('⚠️ الرابط يعمل لكن الـ Secret Key غير مطابق للموجود في Code.gs');
+                else alert('⚠️ الرابط يعمل لكن فيه خطأ: ' + out.error);
+            } catch (e) { alert('❌ ' + explainError(e)); }
+        }
+
+        function enqueue(op) {
+            if (!cloudUrl()) return;
+            const q = getPending(); q.push(op); setPending(q);
+            flushPending();
+        }
+
+        let flushing = false;
+        async function flushPending() {
+            if (flushing || !cloudUrl()) return;
+            flushing = true;
+            try {
+                let q = getPending();
+                while (q.length) {
+                    const out = await cloudPost(q[0]);
+                    if (!out.ok) { setCloudStatus(false); break; }
+                    q.shift(); setPending(q);
+                }
+            } catch (e) { setCloudStatus(false); }
+            finally { flushing = false; }
+        }
+
+        // أول مرة: ارفع السجلات الموجودة على الجهاز إلى الجدول
+        function seedCloud() {
+            const url = cloudUrl();
+            if (!url || getSetting('spcc_seeded') === url) return;
+            const q = getPending();
+            completedRecordsList.forEach(r => {
+                if (!r.id) r.id = newId();
+                if (!r.date) r.date = new Date().toISOString().split('T')[0];
+                q.push({ action: 'add', record: r });
+            });
+            setPending(q);
+            saveDataToStorage();
+            try { localStorage.setItem('spcc_seeded', url); } catch (e) {}
+            flushPending();
+        }
+
+        // اسحب السجلات من الجدول (المصدر الأساسي)
+        async function pullRecords() {
+            if (!cloudUrl()) { setCloudStatus(false); return; }
+            await flushPending();
+            if (getPending().length) { setCloudStatus(false); return; }
+            try {
+                const res = await fetch(cloudUrl() + '?action=list&key=' + encodeURIComponent(getSetting('spcc_send_key')));
+                const out = await res.json();
+                if (!out.ok) { setCloudStatus(false); return; }
+                completedRecordsList = out.records;
+                kpi = {
+                    completed: out.records.length,
+                    bags: out.records.reduce((a, r) => a + (Number(r.bags) || 0), 0),
+                    tons: +out.records.reduce((a, r) => a + (Number(r.tons) || 0), 0).toFixed(2)
+                };
+                saveDataToStorage();
+                renderLoaders();
+                renderRecordsTable();
+                setCloudStatus(true, out.sheetUrl);
+            } catch (e) { setCloudStatus(false); }
         }
 
         async function sendEmailReport() {
             if (completedRecordsList.length === 0) { alert("لا توجد سجلات مكتملة لإرسالها!"); return; }
             const date = new Date().toISOString().split('T')[0];
-            const url = getSetting('spcc_send_url');
+            const url = cloudUrl();
 
-            // إذا ما تم ضبط رابط الإرسال: نفتح تطبيق البريد كحل بديل
+            // إذا ما تم ضبط الربط: نفتح تطبيق البريد كحل بديل
             if (!url) {
                 let bodyText = `تقرير الشحنات المكتملة ليوم ${date}\n\n`;
                 completedRecordsList.forEach((rec, i) => {
@@ -474,16 +584,12 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
             try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ key: getSetting('spcc_send_key'), date: date, records: completedRecordsList, totals: kpi })
-                });
-                const out = await res.json();
+                await flushPending();               // تأكد أن كل السجلات وصلت للجدول أولاً
+                const out = await cloudPost({ action: 'email' });
                 if (out.ok) alert('✅ تم إرسال التقرير بنجاح');
                 else alert('❌ فشل الإرسال: ' + (out.error === 'unauthorized' ? 'الـ Secret Key غير صحيح' : out.error));
             } catch (e) {
-                alert('❌ تعذر الاتصال. تأكد من الإنترنت ومن رابط الإرسال في تبويب المزيد.');
+                alert('❌ ' + explainError(e) + '\nجرّب زر "اختبار الاتصال" في تبويب المزيد.');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = oldHtml;
@@ -626,8 +732,11 @@
                 driverPhone: ldr.driverPhone,
                 startTime: ldr.startTime, 
                 endTime: endTime, 
-                operator: operatorName
+                operator: operatorName,
+                id: newId(),
+                date: new Date().toISOString().split('T')[0]
             });
+            enqueue({ action: 'add', record: completedRecordsList[completedRecordsList.length - 1] });
 
             ldr.isActive = false;
             kpi.completed++; kpi.bags += ldr.bags; kpi.tons += currentTons;
@@ -642,6 +751,7 @@
             if (!rec) return;
             if (!confirm(`هل تريد حذف سجل البوليصة ${rec.plate}؟`)) return;
             completedRecordsList.splice(idx, 1);
+            if (rec.id) enqueue({ action: 'delete', id: rec.id });
             kpi.completed = Math.max(0, kpi.completed - 1);
             kpi.bags = Math.max(0, kpi.bags - rec.bags);
             kpi.tons = Math.max(0, +(kpi.tons - rec.tons).toFixed(2));
@@ -654,6 +764,7 @@
             if (completedRecordsList.length === 0) return;
             if (!confirm("⚠️ هل أنت متأكد من حذف جميع السجلات؟ لا يمكن التراجع.")) return;
             completedRecordsList = [];
+            enqueue({ action: 'clear' });
             kpi = { completed: 0, bags: 0, tons: 0 };
             saveDataToStorage();
             renderLoaders();
@@ -663,6 +774,9 @@
         document.getElementById('send-url').value = getSetting('spcc_send_url'); document.getElementById('send-key').value = getSetting('spcc_send_key');
         renderLoaders();
         renderRecordsTable();
+        seedCloud();
+        pullRecords();
+        setInterval(() => { if (document.visibilityState === 'visible') pullRecords(); }, 30000);
     </script>
 </body>
 </html>
