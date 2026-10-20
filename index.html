@@ -147,7 +147,7 @@
                         <i class="fa-solid fa-trash"></i>
                         <span class="lang-ar">حذف الكل</span><span class="lang-en">Clear All</span>
                     </button>
-                    <button onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
+                    <button id="send-btn" onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
                         <i class="fa-solid fa-envelope"></i>
                         <span class="lang-ar">إرسال تقرير</span><span class="lang-en">Email Report</span>
                     </button>
@@ -177,10 +177,11 @@
             <div class="glass-card p-4 rounded-2xl space-y-3">
                 <label class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-envelope text-emerald-500"></i>
-                    <span class="lang-ar">إيميلات استلام التقرير</span><span class="lang-en">Report Emails</span>
+                    <span class="lang-ar">إعدادات إرسال التقرير</span><span class="lang-en">Report Sending</span>
                 </label>
-                <textarea id="emails-input" rows="3" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="name@spcc.com.sa, name2@spcc.com.sa"></textarea>
-                <button onclick="saveReportEmails()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl transition">
+                <input id="send-url" type="url" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="https://script.google.com/macros/s/.../exec">
+                <input id="send-key" type="text" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="Secret Key">
+                <button onclick="saveSendSettings()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl transition">
                     <span class="lang-ar">حفظ</span><span class="lang-en">Save</span>
                 </button>
             </div>
@@ -444,28 +445,49 @@
         }
 
         const DEFAULT_EMAILS = "admin@spcc.com.sa,packhouse@spcc.com.sa";
-        function getReportEmails() {
-            try { return localStorage.getItem('spcc_emails') || DEFAULT_EMAILS; } catch (e) { return DEFAULT_EMAILS; }
-        }
-        function saveReportEmails() {
-            const v = document.getElementById('emails-input').value.split(/[,;\s\n]+/).map(x => x.trim()).filter(Boolean);
-            const bad = v.find(x => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
-            if (!v.length || bad) { alert('❌ تأكد من كتابة الإيميلات بشكل صحيح' + (bad ? ': ' + bad : '')); return; }
-            try { localStorage.setItem('spcc_emails', v.join(',')); } catch (e) {}
-            alert('✅ تم حفظ إيميلات التقرير');
+        function getSetting(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+        function saveSendSettings() {
+            const url = document.getElementById('send-url').value.trim();
+            const key = document.getElementById('send-key').value.trim();
+            if (url && !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) { alert('❌ الرابط غير صحيح، لازم ينتهي بـ /exec'); return; }
+            try { localStorage.setItem('spcc_send_url', url); localStorage.setItem('spcc_send_key', key); } catch (e) {}
+            alert('✅ تم حفظ إعدادات الإرسال');
         }
 
-        function sendEmailReport() {
+        async function sendEmailReport() {
             if (completedRecordsList.length === 0) { alert("لا توجد سجلات مكتملة لإرسالها!"); return; }
-            let targetEmails = getReportEmails();
-            let date = new Date().toISOString().split('T')[0];
-            let subject = encodeURIComponent(`تقرير الشحنات - مصنع تهامة (${date})`);
-            let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
-            completedRecordsList.forEach((rec, index) => {
-                bodyText += `${index + 1}. الرافعة: Bay ${rec.loaderId} | البوليصة: ${rec.plate} | السائق: ${rec.driverName} (${rec.driverPhone}) | النوع: ${rec.type} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
-            });
-            bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
-            window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+            const date = new Date().toISOString().split('T')[0];
+            const url = getSetting('spcc_send_url');
+
+            // إذا ما تم ضبط رابط الإرسال: نفتح تطبيق البريد كحل بديل
+            if (!url) {
+                let bodyText = `تقرير الشحنات المكتملة ليوم ${date}\n\n`;
+                completedRecordsList.forEach((rec, i) => {
+                    bodyText += `${i + 1}. Bay ${rec.loaderId} | ${rec.plate} | ${rec.driverName} | ${rec.bags} كيس (${rec.tons} طن) | ${rec.operator} | ${rec.startTime} - ${rec.endTime}\n`;
+                });
+                window.location.href = `mailto:${DEFAULT_EMAILS}?subject=${encodeURIComponent('تقرير الشحنات - مصنع تهامة (' + date + ')')}&body=${encodeURIComponent(bodyText)}`;
+                return;
+            }
+
+            const btn = document.getElementById('send-btn');
+            const oldHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ key: getSetting('spcc_send_key'), date: date, records: completedRecordsList, totals: kpi })
+                });
+                const out = await res.json();
+                if (out.ok) alert('✅ تم إرسال التقرير بنجاح');
+                else alert('❌ فشل الإرسال: ' + (out.error === 'unauthorized' ? 'الـ Secret Key غير صحيح' : out.error));
+            } catch (e) {
+                alert('❌ تعذر الاتصال. تأكد من الإنترنت ومن رابط الإرسال في تبويب المزيد.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = oldHtml;
+            }
         }
 
         let html5QrCode = null;
@@ -638,7 +660,7 @@
             renderRecordsTable();
         }
 
-        document.getElementById('emails-input').value = getReportEmails().split(',').join(', ');
+        document.getElementById('send-url').value = getSetting('spcc_send_url'); document.getElementById('send-key').value = getSetting('spcc_send_key');
         renderLoaders();
         renderRecordsTable();
     </script>
