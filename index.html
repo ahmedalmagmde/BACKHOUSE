@@ -9,7 +9,7 @@
         tailwind.config = { darkMode: 'class' }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -128,8 +128,8 @@
             <div class="pt-2">
                 <h2 class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-3">
                     <i class="fa-solid fa-list-check text-emerald-500"></i>
-                    <span class="lang-ar">مراقبة الرافعات (Tahama-Bay 1 إلى 8)</span>
-                    <span class="lang-en">Loaders Monitor (Tahama-Bay 1 - 8)</span>
+                    <span class="lang-ar">مراقبة الرافعات (Bay 1 إلى 8)</span>
+                    <span class="lang-en">Loaders Monitor (Bay 1 - 8)</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
             </div>
@@ -142,10 +142,16 @@
                     <i class="fa-solid fa-clipboard-list text-emerald-500"></i>
                     <span class="lang-ar">السجلات اليومية</span><span class="lang-en">Daily Records</span>
                 </h2>
-                <button onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
-                    <i class="fa-solid fa-envelope"></i>
-                    <span class="lang-ar">إرسال تقرير</span><span class="lang-en">Email Report</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="clearAllRecords()" class="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-trash"></i>
+                        <span class="lang-ar">حذف الكل</span><span class="lang-en">Clear All</span>
+                    </button>
+                    <button onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span class="lang-ar">إرسال تقرير</span><span class="lang-en">Email Report</span>
+                    </button>
+                </div>
             </div>
             <div id="records-list" class="space-y-3"></div>
         </div>
@@ -168,9 +174,15 @@
                 <i class="fa-solid fa-ellipsis text-emerald-500"></i>
                 <span class="lang-ar">إعدادات النظام</span><span class="lang-en">System Settings</span>
             </h2>
-            <div class="glass-card p-6 rounded-2xl text-center">
-                <i class="fa-solid fa-cog text-4xl text-slate-400 mb-3"></i>
-                <p class="text-slate-500 dark:text-slate-400 text-sm">صفحة الإعدادات قيد الإنشاء...</p>
+            <div class="glass-card p-4 rounded-2xl space-y-3">
+                <label class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-envelope text-emerald-500"></i>
+                    <span class="lang-ar">إيميلات استلام التقرير</span><span class="lang-en">Report Emails</span>
+                </label>
+                <textarea id="emails-input" rows="3" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="name@spcc.com.sa, name2@spcc.com.sa"></textarea>
+                <button onclick="saveReportEmails()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl transition">
+                    <span class="lang-ar">حفظ</span><span class="lang-en">Save</span>
+                </button>
             </div>
         </div>
 
@@ -222,17 +234,17 @@
             const icon = document.getElementById('theme-icon');
             if (htmlTag.classList.contains('dark')) {
                 htmlTag.classList.remove('dark');
-                localStorage.setItem('spcc_theme', 'light');
+                try { localStorage.setItem('spcc_theme', 'light'); } catch(e) {}
                 icon.className = 'fa-solid fa-sun';
             } else {
                 htmlTag.classList.add('dark');
-                localStorage.setItem('spcc_theme', 'dark');
+                try { localStorage.setItem('spcc_theme', 'dark'); } catch(e) {}
                 icon.className = 'fa-solid fa-moon';
             }
         }
 
         (function() {
-            const savedTheme = localStorage.getItem('spcc_theme');
+            let savedTheme = null; try { savedTheme = localStorage.getItem('spcc_theme'); } catch(e) {}
             const htmlTag = document.getElementById('html-root');
             const icon = document.getElementById('theme-icon');
             if (savedTheme === 'light') {
@@ -271,22 +283,59 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
-        let savedLoaders = localStorage.getItem('spcc_loaders');
-        let savedRecords = localStorage.getItem('spcc_records');
-        let savedKpi = localStorage.getItem('spcc_kpi');
+        // ===== التخزين الدائم: البيانات ما تنحذف إلا إذا حذفتها أنت =====
+        function bayName(id) { return `Bay ${id}`; }
 
-        let loadersData = savedLoaders ? JSON.parse(savedLoaders) : Array.from({length: 8}, (_, i) => ({
-            id: i + 1, name: `Tahama-Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null, driverName: '', driverPhone: ''
+        let storageOk = true;
+
+        function safeLoad(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return fallback;
+                return JSON.parse(raw);
+            } catch (e) {
+                // لو البيانات تالفة نحتفظ بنسخة منها ولا نمسحها
+                try { localStorage.setItem(key + '_corrupt_backup', localStorage.getItem(key)); } catch (_) {}
+                return fallback;
+            }
+        }
+
+        let loadersData = safeLoad('spcc_loaders', null) || Array.from({length: 8}, (_, i) => ({
+            id: i + 1, name: `Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null, driverName: '', driverPhone: ''
         }));
+        let completedRecordsList = safeLoad('spcc_records', null) || [];
+        let kpi = safeLoad('spcc_kpi', null) || { completed: 0, bags: 0, tons: 0 };
 
-        let completedRecordsList = savedRecords ? JSON.parse(savedRecords) : [];
-        let kpi = savedKpi ? JSON.parse(savedKpi) : { completed: 0, bags: 0, tons: 0 };
+        function showStorageWarning() {
+            if (document.getElementById('storage-warning')) return;
+            const d = document.createElement('div');
+            d.id = 'storage-warning';
+            d.className = 'fixed top-0 inset-x-0 z-[60] bg-rose-600 text-white text-xs font-bold text-center p-2';
+            d.innerText = '⚠️ المتصفح لا يسمح بحفظ البيانات (قد تكون فتحت الملف من تطبيق أو وضع خاص). افتح الموقع من رابط ثابت في Chrome.';
+            document.body.appendChild(d);
+        }
 
         function saveDataToStorage() {
-            localStorage.setItem('spcc_loaders', JSON.stringify(loadersData));
-            localStorage.setItem('spcc_records', JSON.stringify(completedRecordsList));
-            localStorage.setItem('spcc_kpi', JSON.stringify(kpi));
+            try {
+                localStorage.setItem('spcc_loaders', JSON.stringify(loadersData));
+                localStorage.setItem('spcc_records', JSON.stringify(completedRecordsList));
+                localStorage.setItem('spcc_kpi', JSON.stringify(kpi));
+                storageOk = true;
+            } catch (e) {
+                storageOk = false;
+                showStorageWarning();
+            }
         }
+
+        // حفظ إضافي عند إغلاق الصفحة أو تحديثها أو الخروج من التطبيق
+        window.addEventListener('pagehide', saveDataToStorage);
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDataToStorage(); });
+
+        // اطلب من المتصفح عدم حذف البيانات تلقائياً
+        if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(() => {}); }
+
+        // اختبار أن التخزين يعمل فعلاً
+        (function() { try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch (e) { storageOk = false; showStorageWarning(); } })();
 
         function renderLoaders() {
             const container = document.getElementById('loaders-container');
@@ -301,7 +350,7 @@
                         <div class="p-3 border-b border-slate-200 dark:border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span class="font-bold text-sm dark:text-white text-slate-800">${ldr.name}</span>
+                                <span class="font-bold text-sm dark:text-white text-slate-800">${bayName(ldr.id)}</span>
                             </div>
                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40">
                                 ${ldr.type}
@@ -332,7 +381,7 @@
                         <div class="p-3 border-b border-slate-200 dark:border-[#1E2E4A] flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-slate-400 dark:bg-slate-600"></span>
-                                <span class="font-bold text-sm dark:text-white text-slate-800">${ldr.name}</span>
+                                <span class="font-bold text-sm dark:text-white text-slate-800">${bayName(ldr.id)}</span>
                             </div>
                             <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
                                 ${isAr ? 'جاهز' : 'IDLE'}
@@ -369,12 +418,17 @@
             }
 
             let html = '';
-            [...completedRecordsList].reverse().forEach(rec => {
+            completedRecordsList.map((rec, idx) => ({ rec, idx })).reverse().forEach(({ rec, idx }) => {
                 html += `
                 <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2 text-xs">
                     <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700/50 pb-2">
                         <span class="font-bold text-sm dark:text-white text-slate-900">${rec.plate} (${rec.type})</span>
-                        <span class="font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">Tahama-Bay ${rec.loaderId}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">Bay ${rec.loaderId}</span>
+                            <button onclick="deleteRecord(${idx})" class="text-rose-500 hover:text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-1 rounded-lg transition" title="حذف / Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-y-1.5 text-slate-600 dark:text-slate-300">
                         <div>${isAr ? 'السائق:' : 'Driver:'} <strong class="dark:text-white text-slate-900">${rec.driverName}</strong></div>
@@ -389,14 +443,26 @@
             listContainer.innerHTML = html;
         }
 
+        const DEFAULT_EMAILS = "admin@spcc.com.sa,packhouse@spcc.com.sa";
+        function getReportEmails() {
+            try { return localStorage.getItem('spcc_emails') || DEFAULT_EMAILS; } catch (e) { return DEFAULT_EMAILS; }
+        }
+        function saveReportEmails() {
+            const v = document.getElementById('emails-input').value.split(/[,;\s\n]+/).map(x => x.trim()).filter(Boolean);
+            const bad = v.find(x => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));
+            if (!v.length || bad) { alert('❌ تأكد من كتابة الإيميلات بشكل صحيح' + (bad ? ': ' + bad : '')); return; }
+            try { localStorage.setItem('spcc_emails', v.join(',')); } catch (e) {}
+            alert('✅ تم حفظ إيميلات التقرير');
+        }
+
         function sendEmailReport() {
             if (completedRecordsList.length === 0) { alert("لا توجد سجلات مكتملة لإرسالها!"); return; }
-            let targetEmails = "admin@spcc.com.sa,packhouse@spcc.com.sa";
+            let targetEmails = getReportEmails();
             let date = new Date().toISOString().split('T')[0];
             let subject = encodeURIComponent(`تقرير الشحنات - مصنع تهامة (${date})`);
             let bodyText = `نظام التحميل الآلي - مصنع تهامة\nتقرير الشحنات المكتملة ليوم ${date}\n\n`;
             completedRecordsList.forEach((rec, index) => {
-                bodyText += `${index + 1}. الرافعة: Tahama-Bay ${rec.loaderId} | البوليصة: ${rec.plate} | السائق: ${rec.driverName} (${rec.driverPhone}) | النوع: ${rec.type} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
+                bodyText += `${index + 1}. الرافعة: Bay ${rec.loaderId} | البوليصة: ${rec.plate} | السائق: ${rec.driverName} (${rec.driverPhone}) | النوع: ${rec.type} | الكمية: ${rec.bags} كيس (${rec.tons} طن) | المشغل: ${rec.operator} | وقت الانتهاء: ${rec.endTime}\n`;
             });
             bodyText += `\nإجمالي الشحنات: ${completedRecordsList.length}\nإجمالي الأطنان: ${kpi.tons.toFixed(1)} MT\n\nتم الإرسال بواسطة النظام الآلي.`;
             window.location.href = `mailto:${targetEmails}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
@@ -419,7 +485,11 @@
 
             html5QrCode.start(
                 { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } },
+                {
+                    fps: 10,
+                    qrbox: function(w, h) { const m = Math.min(w, h); return { width: Math.floor(m * 0.9), height: Math.floor(m * 0.55) }; },
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                },
                 function onScanSuccess(decodedText) {
                     closeQRCamera();
                     askForLoaderAndStart(decodedText);
@@ -437,58 +507,78 @@
             }
         }
 
-        function askForLoaderAndStart(decodedText) {
-            let plate = "DW25KQ";
-            let matchPlate = decodedText.match(/([A-Z0-9]{5,8})/);
-            if (matchPlate) plate = matchPlate[1];
-            else if (decodedText.length > 2) plate = decodedText.substring(0, 10).trim();
+        // يقرأ نص الباركود ويستخرج رقم الرافعة (Bay) ورقم البوليصة
+        function parseScan(text) {
+            let raw = String(text || '').trim();
+            // تحويل الأرقام العربية إلى إنجليزية
+            raw = raw.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-            let input = prompt(`📷 تم مسح الباركود بنجاح!\nالبوليصة: ${plate}\n\n👉 أدخل رقم الرافعة المطلوب (من 1 إلى 8):`, "3");
-            if (input === null) return;
+            const bayRe = /(?:tahama[\s\-_]*)?(?:bay|loader|الرافعة|رافعة)[\s\-_:#.]*0*([1-8])(?!\d)/i;
+            const m = raw.match(bayRe);
+            const bay = m ? parseInt(m[1], 10) : null;
 
-            let targetId = parseInt(input.trim());
-            if (isNaN(targetId) || targetId < 1 || targetId > 8) {
-                alert("❌ رقم غير صحيح. يجب إدخال رقم بين 1 و 8.");
-                return;
-            }
+            let rest = raw.replace(bayRe, ' ').replace(/tahama/ig, ' ');
+            const tokens = rest.toUpperCase().match(/[A-Z0-9][A-Z0-9\-\/]{3,19}/g) || [];
+            const plate = tokens.find(t => /[A-Z]/.test(t) && /\d/.test(t)) || tokens[0] || '';
+            return { bay, plate };
+        }
 
-            let targetLoader = loadersData.find(l => l.id === targetId);
-            if (targetLoader.isActive) {
-                alert(`⚠️ عذراً، الرافعة Tahama-Bay ${targetId} مشغولة حالياً!`);
-                return;
-            }
-
-            targetLoader.isActive = true;
-            targetLoader.plate = plate.toUpperCase();
-            targetLoader.type = "PAPER BAG CEMENT";
-            targetLoader.bags = 600;
-            targetLoader.driverName = "نصار علي";
-            targetLoader.driverPhone = "+966508935015";
-            targetLoader.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
-
+        function activateLoader(ldr, plate) {
+            ldr.isActive = true;
+            ldr.plate = plate.toUpperCase();
+            ldr.type = "PAPER BAG CEMENT";
+            ldr.bags = 600;
+            ldr.driverName = "نصار علي";
+            ldr.driverPhone = "+966508935015";
+            ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
             saveDataToStorage();
             renderLoaders();
-            alert(`✅ تم توجيه البوليصة ${targetLoader.plate} إلى Tahama-Bay ${targetId}!`);
+        }
+
+        function askForLoaderAndStart(decodedText) {
+            const parsed = parseScan(decodedText);
+
+            // 1) رقم الرافعة يؤخذ من الباركود أولاً (مثل: bay 8)
+            let targetId = parsed.bay;
+
+            // 2) رقم البوليصة
+            let plate = parsed.plate;
+            if (!plate) {
+                const p = prompt(`📷 تم مسح الباركود\nالنص المقروء: ${decodedText}\n\nلم أجد رقم البوليصة، أدخله:`, "");
+                if (!p || !p.trim()) return;
+                plate = p.trim().toUpperCase();
+            }
+
+            // 3) فقط إذا الباركود ما فيه bay نسأل عن رقم الرافعة
+            if (!targetId) {
+                const input = prompt(`📷 تم مسح الباركود بنجاح!\nالبوليصة: ${plate}\n\nلم أجد رقم الـ Bay في الباركود.\n👉 أدخل رقم الرافعة (من 1 إلى 8):`, "");
+                if (input === null) return;
+                targetId = parseInt(input.trim(), 10);
+            }
+
+            if (isNaN(targetId) || targetId < 1 || targetId > 8) {
+                alert("❌ رقم غير صحيح. يجب أن يكون بين 1 و 8.");
+                return;
+            }
+
+            const targetLoader = loadersData.find(l => l.id === targetId);
+            if (targetLoader.isActive) {
+                alert(`⚠️ عذراً، الرافعة Bay ${targetId} مشغولة حالياً!`);
+                return;
+            }
+
+            activateLoader(targetLoader, plate);
+            alert(`✅ تم توجيه البوليصة ${targetLoader.plate} إلى Bay ${targetId}!`);
         }
 
         function startLoader(id) {
             const ldr = loadersData.find(l => l.id === id);
-            let p = prompt(`أدخل بوليصة الشحن لـ ${ldr.name}:`, "DW25KQ");
-            if (p) {
-                ldr.isActive = true;
-                ldr.plate = p.toUpperCase();
-                ldr.type = "PAPER BAG CEMENT";
-                ldr.bags = 600;
-                ldr.driverName = "نصار علي";
-                ldr.driverPhone = "+966508935015";
-                ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
-                saveDataToStorage();
-                renderLoaders();
-            }
+            let p = prompt(`أدخل بوليصة الشحن لـ ${bayName(ldr.id)}:`, "DW25KQ");
+            if (p && p.trim()) { activateLoader(ldr, p.trim()); }
         }
 
         function cancelLoader(id) {
-            if (confirm(`هل أنت متأكد من إلغاء تحميل الرافعة Tahama-Bay ${id}؟`)) {
+            if (confirm(`هل أنت متأكد من إلغاء تحميل الرافعة Bay ${id}؟`)) {
                 const ldr = loadersData.find(l => l.id === id);
                 ldr.isActive = false;
                 ldr.plate = '';
@@ -525,6 +615,30 @@
             renderRecordsTable();
         }
 
+        function deleteRecord(idx) {
+            const rec = completedRecordsList[idx];
+            if (!rec) return;
+            if (!confirm(`هل تريد حذف سجل البوليصة ${rec.plate}؟`)) return;
+            completedRecordsList.splice(idx, 1);
+            kpi.completed = Math.max(0, kpi.completed - 1);
+            kpi.bags = Math.max(0, kpi.bags - rec.bags);
+            kpi.tons = Math.max(0, +(kpi.tons - rec.tons).toFixed(2));
+            saveDataToStorage();
+            renderLoaders();
+            renderRecordsTable();
+        }
+
+        function clearAllRecords() {
+            if (completedRecordsList.length === 0) return;
+            if (!confirm("⚠️ هل أنت متأكد من حذف جميع السجلات؟ لا يمكن التراجع.")) return;
+            completedRecordsList = [];
+            kpi = { completed: 0, bags: 0, tons: 0 };
+            saveDataToStorage();
+            renderLoaders();
+            renderRecordsTable();
+        }
+
+        document.getElementById('emails-input').value = getReportEmails().split(',').join(', ');
         renderLoaders();
         renderRecordsTable();
     </script>
