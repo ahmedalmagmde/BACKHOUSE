@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" id="html-root" class="dark">
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SPCC Tahama - Auto Loader System</title>
@@ -173,7 +175,7 @@
         <div id="tab-more" class="tab-content hidden space-y-4">
             <h2 class="text-xl font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-4">
                 <i class="fa-solid fa-ellipsis text-emerald-500"></i>
-                <span class="lang-ar">إعدادات النظام</span><span class="lang-en">System Settings</span>
+                <span class="lang-ar">إعدادات النظام</span><span class="lang-en">System Settings</span> <span class="text-[10px] font-mono text-slate-400 align-middle">v10</span>
             </h2>
             <div class="glass-card p-4 rounded-2xl space-y-3">
                 <label class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2">
@@ -194,28 +196,30 @@
     </main>
 
     <!-- نافذة الكاميرا -->
-    <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-slate-900 dark:bg-[#0F1E36] rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
-            <div class="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="text-white font-bold flex items-center gap-2">
+    <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-3" style="height:100dvh">
+        <div class="w-full max-w-md bg-slate-900 rounded-2xl border border-slate-800 flex flex-col overflow-hidden" style="max-height:calc(100dvh - 24px)">
+            <div class="px-4 py-3 bg-slate-950 border-b border-slate-800 flex justify-between items-center shrink-0">
+                <h3 class="text-white font-bold text-sm flex items-center gap-2">
                     <i class="fa-solid fa-camera text-emerald-500"></i>
-                    <span class="lang-ar">توجيه الكاميرا للباركود</span><span class="lang-en">Scan Barcode</span>
+                    <span class="lang-ar">مسح الباركود</span><span class="lang-en">Scan Barcode</span>
                 </h3>
-                <button onclick="closeQRCamera()" class="text-slate-400 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg transition font-bold">
+                <button onclick="closeQRCamera()" class="text-slate-300 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg transition font-bold text-sm">
                     إغلاق
                 </button>
             </div>
-            <div class="p-4 bg-slate-900 relative">
-                <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black min-h-[300px]"></div>
-                <div id="scan-status" class="mt-3 p-3 rounded-xl bg-slate-800 text-slate-200 text-xs text-center leading-relaxed">وجّه الكاميرا للباركود...</div>
-                <div class="mt-3">
-                    <div class="text-[11px] text-slate-400 mb-1 text-center">أو اختر الـ Bay يدوياً:</div>
-                    <div class="grid grid-cols-4 gap-2" id="bay-buttons"></div>
-                    <button onclick="manualPlate()" class="mt-2 w-full py-2 text-xs font-bold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">إدخال البوليصة يدوياً</button>
-                </div>
-                <div id="camera-error" class="hidden mt-4 p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-300 text-xs text-center leading-relaxed">
+            <div class="p-3 space-y-3 overflow-y-auto">
+                <div id="scan-status" class="p-2.5 rounded-xl bg-slate-800 text-slate-200 text-xs text-center leading-relaxed">وجّه الكاميرا للباركود...</div>
+                <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black"></div>
+                <div id="camera-error" class="hidden p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-300 text-xs text-center leading-relaxed">
                     لا يمكن الوصول للكاميرا. يرجى التأكد من إعطاء صلاحية الكاميرا للمتصفح.
                 </div>
+                <div>
+                    <div class="text-[11px] text-slate-400 mb-1.5 text-center">أو اختر الـ Bay يدوياً</div>
+                    <div class="grid grid-cols-4 gap-2" dir="ltr" id="bay-buttons"></div>
+                </div>
+                <button onclick="manualPlate()" class="w-full py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-200 border border-slate-700">
+                    <i class="fa-solid fa-keyboard text-emerald-500"></i> إدخال البوليصة يدوياً
+                </button>
             </div>
         </div>
     </div>
@@ -373,8 +377,9 @@
                                 <span class="font-mono font-black text-sm dark:text-white text-slate-900">${ldr.plate}</span>
                             </div>
                             <div class="space-y-1 px-1">
-                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'السائق:' : 'Driver:'}</span><span class="font-bold dark:text-slate-200 text-slate-800">${ldr.driverName || 'نصار علي'}</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'الهاتف:' : 'Phone:'}</span><span class="font-mono dark:text-slate-300 text-slate-700">${ldr.driverPhone || '+966508935015'}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'السائق:' : 'Driver:'}</span><span class="font-bold dark:text-slate-200 text-slate-800">${ldr.driverName || '—'}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'الهاتف:' : 'Phone:'}</span><span class="font-mono dark:text-slate-300 text-slate-700">${ldr.driverPhone || '—'}</span></div>
+                                ${ldr.vehicle ? `<div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'المركبة:' : 'Vehicle:'}</span><span class="font-mono dark:text-slate-300 text-slate-700">${ldr.vehicle}</span></div>` : ''}
                                 <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'الكمية:' : 'Quantity:'}</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">${ldr.bags} كيس (${(ldr.bags*0.05).toFixed(1)} MT)</span></div>
                                 <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'وقت البدء:' : 'In Time:'}</span><span class="font-mono dark:text-slate-200 text-slate-700">${ldr.startTime}</span></div>
                             </div>
@@ -622,6 +627,7 @@
                 { facingMode: "environment" }, 
                 {
                     fps: 10,
+                    aspectRatio: 1.333,
                     qrbox: function(w, h) { const m = Math.min(w, h); return { width: Math.floor(m * 0.9), height: Math.floor(m * 0.55) }; },
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true }
                 },
@@ -659,19 +665,31 @@
                 if (short) bay = parseInt(short[1], 10);
             }
 
-            let rest = raw.replace(bayRe, ' ').replace(/tahama/ig, ' ');
-            const tokens = rest.toUpperCase().match(/[A-Z0-9][A-Z0-9\-\/]{3,19}/g) || [];
-            const plate = tokens.find(t => /[A-Z]/.test(t) && /\d/.test(t)) || tokens[0] || '';
-            return { bay, plate };
+            // باركود البوليصة: 1|رقم البوليصة|كود|الأكياس|السائق|الجوال|المركبة
+            let plate = '', info = null;
+            if (raw.indexOf('|') !== -1) {
+                const f = raw.split('|').map(x => x.trim());
+                if (f.length >= 6) {
+                    const bags = parseInt(f[3], 10);
+                    plate = (f[1] || '').toUpperCase();
+                    info = { bags: bags > 0 ? bags : null, driverName: f[4] || '', driverPhone: f[5] || '', vehicle: f[6] || '' };
+                }
+            }
+            if (!plate) {
+                let rest = raw.replace(bayRe, ' ').replace(/tahama/ig, ' ');
+                const tokens = rest.toUpperCase().match(/[A-Z0-9][A-Z0-9\-\/]{3,19}/g) || [];
+                plate = tokens.find(t => /[A-Z]/.test(t) && /\d/.test(t)) || tokens[0] || '';
+            }
+            return { bay, plate, info };
         }
 
         // ===== مسح على خطوتين: باركود الـ Bay + باركود الشاحنة (أو الاثنين في باركود واحد) =====
-        let pendingBay = null, pendingPlate = '', lastScanText = '', lastScanTime = 0;
+        let pendingBay = null, pendingPlate = '', pendingInfo = null, lastScanText = '', lastScanTime = 0;
 
         function setScanStatus(html, ok) {
             const el = document.getElementById('scan-status');
             if (!el) return;
-            el.className = 'mt-3 p-3 rounded-xl text-xs text-center leading-relaxed ' + (ok ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-200');
+            el.className = 'p-2.5 rounded-xl text-xs text-center leading-relaxed ' + (ok ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-200');
             el.innerHTML = html;
         }
 
@@ -680,25 +698,41 @@
             if (!box || box.children.length) return;
             for (let i = 1; i <= 8; i++) {
                 const b = document.createElement('button');
-                b.textContent = i;
-                b.className = 'py-2 rounded-lg bg-slate-800 hover:bg-emerald-600 text-white font-black text-sm border border-slate-700';
+                b.textContent = 'Bay ' + i;
+                b.dataset.bay = i;
+                b.className = 'bay-btn py-2.5 rounded-lg bg-slate-800 text-white font-bold text-xs border border-slate-700 transition';
                 b.onclick = () => pickBay(i);
                 box.appendChild(b);
             }
         }
 
         function resetScanState() {
-            pendingBay = null; pendingPlate = ''; lastScanText = ''; lastScanTime = 0;
+            pendingBay = null; pendingPlate = ''; pendingInfo = null; lastScanText = ''; lastScanTime = 0;
             buildBayButtons();
             setScanStatus('وجّه الكاميرا للباركود...', false);
         }
 
         function escHtml(t) { return String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
 
+        function highlightBay() {
+            document.querySelectorAll('#bay-buttons .bay-btn').forEach(b => {
+                const on = Number(b.dataset.bay) === pendingBay;
+                b.classList.toggle('bg-emerald-600', on);
+                b.classList.toggle('border-emerald-400', on);
+                b.classList.toggle('bg-slate-800', !on);
+            });
+        }
+
         function updateScanProgress() {
+            highlightBay();
             if (pendingBay && pendingPlate) { finishScan(pendingBay, pendingPlate); return; }
-            if (pendingBay) setScanStatus(`✅ <b>Bay ${pendingBay}</b> تم تحديده<br>الآن امسح باركود الشاحنة (البوليصة)`, true);
-            else if (pendingPlate) setScanStatus(`✅ البوليصة <b>${escHtml(pendingPlate)}</b><br>الآن امسح باركود الـ Bay أو اختر الرقم من الأسفل`, true);
+            const raw = lastScanText ? `<div dir="ltr" class="mt-1 text-[10px] font-mono text-slate-400 break-all">${escHtml(lastScanText)}</div>` : '';
+            window.__raw = raw;
+            if (pendingBay) setScanStatus(`✅ <b>Bay ${pendingBay}</b> تم تحديده<br>الآن امسح باركود الشاحنة (البوليصة)${raw}`, true);
+            else if (pendingPlate) {
+                const d = pendingInfo ? `<br>${escHtml(pendingInfo.driverName)} · ${escHtml(pendingInfo.driverPhone)} · ${pendingInfo.bags || ''} كيس` : '';
+                setScanStatus(`✅ البوليصة <b>${escHtml(pendingPlate)}</b>${d}<br><b>اختر رقم الـ Bay من الأسفل</b>${raw}`, true);
+            }
         }
 
         function handleScan(text) {
@@ -710,6 +744,7 @@
             const parsed = parseScan(text);
             if (parsed.bay) pendingBay = parsed.bay;
             if (parsed.plate) pendingPlate = parsed.plate;
+            if (parsed.info) pendingInfo = parsed.info;
             if (!parsed.bay && !parsed.plate) {
                 setScanStatus(`ما قدرت أفهم الباركود:<br><span dir="ltr" class="font-mono">${escHtml(text)}</span><br>اختر الـ Bay من الأسفل`, false);
                 return;
@@ -727,21 +762,23 @@
         }
 
         function finishScan(bay, plate) {
+            const info = pendingInfo;
             const target = loadersData.find(l => l.id === bay);
             closeQRCamera();
             if (!target) { alert('❌ رقم Bay غير صحيح'); return; }
             if (target.isActive) { alert(`⚠️ عذراً، الرافعة Bay ${bay} مشغولة حالياً!`); return; }
-            activateLoader(target, plate);
+            activateLoader(target, plate, info);
             alert(`✅ تم توجيه البوليصة ${target.plate} إلى Bay ${bay}!`);
         }
 
-        function activateLoader(ldr, plate) {
+        function activateLoader(ldr, plate, info) {
             ldr.isActive = true;
             ldr.plate = plate.toUpperCase();
             ldr.type = "PAPER BAG CEMENT";
-            ldr.bags = 600;
-            ldr.driverName = "نصار علي";
-            ldr.driverPhone = "+966508935015";
+            ldr.bags = (info && info.bags) ? info.bags : 600;
+            ldr.driverName = (info && info.driverName) ? info.driverName : '—';
+            ldr.driverPhone = (info && info.driverPhone) ? info.driverPhone : '—';
+            ldr.vehicle = (info && info.vehicle) ? info.vehicle : '';
             ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
             saveDataToStorage();
             renderLoaders();
@@ -779,7 +816,7 @@
                 return;
             }
 
-            activateLoader(targetLoader, plate);
+            activateLoader(targetLoader, plate, parsed.info);
             alert(`✅ تم توجيه البوليصة ${targetLoader.plate} إلى Bay ${targetId}!`);
         }
 
