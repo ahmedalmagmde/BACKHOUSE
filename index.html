@@ -66,7 +66,7 @@ const f12=t=>{if(!t)return'';let[h,m,q]=t.split(':');const p=h>=12?'PM':'AM';ret
 function parseQR(raw){const t=String(raw).split('|').map(x=>x.trim()),o={};if(t.length<4)return o;
 const ci=t.findIndex(x=>/^FN[A-Z0-9]+$/i.test(x));if(ci>0){o.order=t[ci-1];o.code=t[ci].toUpperCase();if(/^\d+$/.test(t[ci+1]||''))o.bags=+t[ci+1];o.plate=t[ci+2]||''}
 const mi=t.findIndex(x=>/^\+?\d{9,}\+?$/.test(x));if(mi>=0){o.mobile='+'+t[mi].replace(/\+/g,'');o.name=t[mi+1]||''}
-const lt=t.find((x,i)=>i>ci+2&&/^[A-Z]{3}$/.test(x));if(lt&&o.plate&&!o.plate.includes('-'))o.plate+='-'+lt;return o}
+const m=(o.name||'').match(/^(.*\S)\s*-\s*([A-Za-z]{2,4})$/);if(m){o.name=m[1];if(o.plate&&!o.plate.includes('-'))o.plate+='-'+m[2]}return o}
 const ctOf=F=>{const c=(F.q||{}).code||'';return /GU/.test(c)?'GU':/PP/.test(c)?'PPC':/BG|OPC/.test(c)?'OPC':PC[F.P-1]};
 const qf=F=>{const q=F.q||{};return{ord:q.order||F.qr,code:q.code||'',plate:q.plate||'',mob:q.mobile||'',nm:q.name||'',bags:q.bags}};
 const qi=()=>F.q&&(F.q.name||F.q.bags)?`<div class="sub" style="margin-top:8px">${esc(F.q.name||'')} • ${esc(F.q.plate||'')} • ${F.q.bags||''} ${T('bg')} • ${esc(F.q.code||'')}</div>`:'';
@@ -133,7 +133,7 @@ if(id=='gs'){if(S.sheetUrl)window.open(S.sheetUrl,'_blank');else toast(ar?'ال�
 if(id=='fc'){F={qr:'',L:null,P:null,s:'',e:'',stop:''};render()}if(id=='fg'){if(!F.s)F.s=nowT();F.e='';save(false)}if(id=='fd')save(true);
 if(id=='fs')scanQR();
 if(id=='bS'){if(S.user){S.user=null;sv();render()}else{$('dg').showModal()}}if(id=='bL'){S.lang=S.lang=='ar'?'en':'ar';sv();render()}if(id=='bT'){S.theme=S.theme=='dark'?'light':'dark';sv();render()}if(id=='bR'){pull(1)}
-if(id=='ex'){const a=filt(),c='Receipt,Shift,Operator,Loader,Packer,Cement,Start,End,Stoppage,Bags,Tons\n'+a.map(r=>[r.qr,r.sh,r.op,'L-'+r.L,'P-'+r.P,r.ct,f12(r.s),f12(r.e),r.stop,bags(r),tons(r)].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),l=document.createElement('a');l.href=URL.createObjectURL(new Blob(['\ufeff'+c],{type:'text/csv'}));l.download='truck-loading.csv';l.click()}});
+if(id=='ex')exportX();});
 let role='operator';const rr=()=>{$('rO').className='bt '+(role=='operator'?'sel':'');$('rA').className='bt '+(role=='admin'?'sel':'')};
 $('rO').onclick=()=>{role='operator';rr()};$('rA').onclick=()=>{role='admin';rr()};$('dc').onclick=()=>$('dg').close();
 $('dk').onclick=()=>{const n=$('nm').value.trim();if(!n)return;S.user={name:n,role};sv();$('dg').close();render()};
@@ -162,6 +162,13 @@ try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'envi
 sm.textContent=ar?'وجّه الكاميرا على الباركود وثبّتها':'Point the camera at the barcode and hold steady';const t0=Date.now();
 const loop=async()=>{if(!on)return;if(v.videoWidth){const val=await dec(v,v.videoWidth,v.videoHeight);if(val)return done(val)}
 if(Date.now()-t0>8000)sm.textContent=ar?'قرّب أو ابعد قليلاً وتأكد من الإضاءة، أو استخدم التقاط صورة':'Move closer/farther, check lighting, or use Take photo';setTimeout(loop,150)};loop()}
+const HD=['ORDER NO','CEMENT TYPE','BAGS','DRIVER NAME','DRIVER ID','VECHICLE NUMBER','QR CODE SCAN','SHIFT','OPERATOR NAME','LOADER NUMBER','CONNECTING PACKER','START TIME','END TIME','DURATION','STOPPAGE','STATUS'];
+const SP={none:'NONE',mech:'MECHANICAL',inst:'INSTRUMENT',prod:'PRODUCTION'},h0=t=>t?t.replace(/^0/,''):'';
+function xrow(r){const q=r.nm?{order:r.ord,code:r.code,name:r.nm,mobile:r.mob,plate:r.plate}:parseQR(r.qr),d=r.e?h0(hms(durS(r.s,r.e))):'';
+return[q.order||r.ord||r.qr,q.code||r.code||{OPC:'FNBG1',GU:'FNGU',PPC:'FNPPC'}[r.ct]||'',r.bags||S.cfg.bags,q.name||'',q.mobile||'',q.plate||'',r.qr,r.sh+' SHIFT',r.op,'L-'+r.L,'P-'+r.P,h0(r.s),h0(r.e),d,SP[r.stop]||'',!r.e?'in progress':(r.stop=='mech'||r.stop=='inst')?'not completed':'completed']}
+async function exportX(){const rows=[HD].concat(filt().slice().reverse().map(xrow));
+try{if(!window.XLSX)await ld_('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[10,12,7,18,16,16,50,9,16,11,14,11,11,10,12,13].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Loading');XLSX.writeFile(wb,'truck-loading.xlsx');return}catch(e){}
+const c=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),l=document.createElement('a');l.href=URL.createObjectURL(new Blob(['\ufeff'+c],{type:'text/csv'}));l.download='truck-loading.csv';l.click()}
 const U=()=>S.cfg.url||SHEET_URL;
 function push(r){if(!U())return;fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'save',rec:Object.assign({},r,{bags:bags(r),tons:tons(r),s12:f12(r.s),e12:f12(r.e)})})}).catch(()=>{})}
 function pushB(){if(!U())return;fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'blocks',blk:S.blk})}).catch(()=>{})}
