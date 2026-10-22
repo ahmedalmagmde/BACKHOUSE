@@ -1,903 +1,163 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl" id="html-root" class="dark">
-<head>
-    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SPCC Tahama - Auto Loader System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
-        html[dir="rtl"] body { font-family: 'Cairo', sans-serif; }
-        html[dir="ltr"] body { font-family: 'Inter', sans-serif; }
-        html[dir="rtl"] .lang-en { display: none; }
-        html[dir="ltr"] .lang-ar { display: none; }
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
-        
-        html.dark body { background-color: #0B1528; color: #f1f5f9; }
-        html.dark .glass-card { background: #0F1E36; border: 1px solid #1E2E4A; }
-        
-        html:not(.dark) body { background-color: #F8FAFC; color: #1E293B; }
-        html:not(.dark) .glass-card { background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    </style>
-</head>
-<body class="pb-24 antialiased">
-
-    <header class="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
-        <div class="max-w-5xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="logo.png" alt="SPCC Logo" class="w-12 h-12 rounded-xl shadow-lg object-contain bg-white/5 p-0.5 border border-[#FBB03B]/30" onerror="this.style.display='none'">
-                <div class="leading-tight mt-1">
-                    <h1 class="font-extrabold text-[15px] tracking-wide text-white lang-ar">أسمنت المنطقة الجنوبية</h1>
-                    <h1 class="font-extrabold text-[14px] tracking-wide text-white lang-en">SOUTHERN PROVINCE CEMENT</h1>
-                    <div class="text-[11px] font-bold flex items-center gap-1 mt-0.5">
-                        <span class="text-[#FBB03B] lang-ar">مصنع تهامة |</span>
-                        <span class="text-[#FBB03B] lang-en">Tahama Plant |</span>
-                        <span class="text-slate-400 lang-ar">نظام التحميل الآلي</span>
-                        <span class="text-slate-400 lang-en">Auto Loader System</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-2">
-                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-800 dark:bg-slate-900 border border-slate-700 dark:border-slate-800 rounded-xl text-slate-200 dark:text-slate-300 font-mono text-[11px]">
-                    <i class="fa-regular fa-clock text-[#FBB03B]"></i>
-                    <span id="live-time">00:00:00</span>
-                </div>
-                <button onclick="toggleTheme()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 px-3 py-1 rounded-xl text-xs font-bold border border-slate-700 transition" title="تبديل الوضع الليلي والنهاري">
-                    <i id="theme-icon" class="fa-solid fa-moon"></i>
-                </button>
-                <button onclick="toggleLanguage()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1 rounded-xl text-xs font-bold border border-slate-700 transition">
-                    <i class="fa-solid fa-globe"></i> <span class="lang-ar">EN</span><span class="lang-en">AR</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-5xl mx-auto p-4 space-y-4">
-        
-        <!-- التبويب 1: الرئيسية -->
-        <div id="tab-home" class="tab-content block space-y-4">
-            <div class="glass-card rounded-2xl p-4 shadow-md flex justify-between items-center">
-                <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-user-circle text-2xl text-emerald-500"></i>
-                    <div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400 lang-ar">المشغل الحالي:</div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400 lang-en">Operator:</div>
-                        <select id="operatorSelect" class="bg-transparent font-bold text-sm dark:text-white text-slate-800 focus:outline-none cursor-pointer border-b border-dashed border-slate-400 pb-0.5">
-                            <option class="text-slate-900" value="Ahmed Al-Ghamdi">Ahmed Al-Ghamdi</option>
-                            <option class="text-slate-900" value="Mohammed Al-Shehri">Mohammed Al-Shehri</option>
-                            <option class="text-slate-900" value="Saeed Al-Zahrani">Saeed Al-Zahrani</option>
-                            <option class="text-slate-900" value="Khalid Al-Asmari">Khalid Al-Asmari</option>
-                            <option class="text-slate-900" value="Fahad Al-Qarni">Fahad Al-Qarni</option>
-                            <option class="text-slate-900" value="Salem Al-Otaibi">Salem Al-Otaibi</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="text-end">
-                    <span id="shift-badge" class="px-3 py-1 rounded-full border text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
-                        Shift A
-                    </span>
-                    <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-1" id="live-date">--/--/----</div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
-                        <span class="font-medium lang-ar">الرافعات النشطة</span><span class="font-medium lang-en">Active</span>
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mt-1"></span>
-                    </div>
-                    <div class="text-xl font-black dark:text-white text-slate-800 mt-1" id="kpi-active">0 <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">/ 8</span></div>
-                </div>
-                <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
-                        <span class="font-medium lang-ar">المكتملة</span><span class="font-medium lang-en">Completed</span>
-                        <i class="fa-solid fa-check-circle text-emerald-500"></i>
-                    </div>
-                    <div class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1" id="kpi-completed">0</div>
-                </div>
-                <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
-                        <span class="font-medium lang-ar">الأكياس</span><span class="font-medium lang-en">Bags</span>
-                        <i class="fa-solid fa-box text-sky-500"></i>
-                    </div>
-                    <div class="text-xl font-black text-sky-600 dark:text-sky-300 mt-1" id="kpi-bags">0</div>
-                </div>
-                <div class="glass-card p-3 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-slate-500 dark:text-slate-400 text-[11px]">
-                        <span class="font-medium lang-ar">الأطنان</span><span class="font-medium lang-en">Tons</span>
-                        <i class="fa-solid fa-layer-group text-[#FBB03B]"></i>
-                    </div>
-                    <div class="text-xl font-black text-amber-600 dark:text-[#FBB03B] mt-1" id="kpi-tons">0 <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">MT</span></div>
-                </div>
-            </div>
-
-            <button onclick="safeOpenQRCamera()" class="w-full py-4 px-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-3">
-                <i class="fa-solid fa-qrcode text-2xl"></i>
-                <span class="lang-ar">مسح رمز الشاحنة بالكاميرا (QR)</span>
-                <span class="lang-en">OPEN CAMERA & SCAN QR</span>
-            </button>
-
-            <div class="pt-2">
-                <h2 class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-3">
-                    <i class="fa-solid fa-list-check text-emerald-500"></i>
-                    <span class="lang-ar">مراقبة الرافعات (Bay 1 إلى 8)</span>
-                    <span class="lang-en">Loaders Monitor (Bay 1 - 8)</span>
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" id="loaders-container"></div>
-            </div>
-        </div>
-
-        <!-- التبويب 2: السجلات -->
-        <div id="tab-records" class="tab-content hidden space-y-4">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold dark:text-white text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-list text-emerald-500"></i>
-                    <span class="lang-ar">السجلات اليومية</span><span class="lang-en">Daily Records</span>
-                </h2>
-                <div class="flex items-center gap-2">
-                    <button onclick="clearAllRecords()" class="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-trash"></i>
-                        <span class="lang-ar">حذف الكل</span><span class="lang-en">Clear All</span>
-                    </button>
-                    <button id="send-btn" onclick="sendEmailReport()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md flex items-center gap-2">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span class="lang-ar">إرسال تقرير</span><span class="lang-en">Email Report</span>
-                    </button>
-                </div>
-            </div>
-            <div id="cloud-status" class="text-[11px] text-slate-500 dark:text-slate-400 hidden"></div>
-            <div id="records-list" class="space-y-3"></div>
-        </div>
-
-        <!-- التبويب 3: التقارير -->
-        <div id="tab-reports" class="tab-content hidden space-y-4">
-            <h2 class="text-xl font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-chart-pie text-emerald-500"></i>
-                <span class="lang-ar">تقارير الأداء</span><span class="lang-en">Performance Reports</span>
-            </h2>
-            <div class="glass-card p-6 rounded-2xl text-center">
-                <i class="fa-solid fa-chart-bar text-4xl text-slate-400 mb-3"></i>
-                <p class="text-slate-500 dark:text-slate-400 text-sm">صفحة التقارير والرسوم البيانية قيد الإنشاء...</p>
-            </div>
-        </div>
-
-        <!-- التبويب 4: المزيد -->
-        <div id="tab-more" class="tab-content hidden space-y-4">
-            <h2 class="text-xl font-bold dark:text-white text-slate-800 flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-ellipsis text-emerald-500"></i>
-                <span class="lang-ar">إعدادات النظام</span><span class="lang-en">System Settings</span> <span class="text-[10px] font-mono text-slate-400 align-middle">v10</span>
-            </h2>
-            <div class="glass-card p-4 rounded-2xl space-y-3">
-                <label class="text-sm font-bold dark:text-white text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-envelope text-emerald-500"></i>
-                    <span class="lang-ar">الربط مع Google (الحفظ + الإيميل)</span><span class="lang-en">Google Link (Sheet + Email)</span>
-                </label>
-                <input id="send-url" type="url" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="https://script.google.com/macros/s/.../exec">
-                <input id="send-key" type="text" dir="ltr" class="w-full p-3 rounded-xl border border-slate-300 dark:border-[#233d66] bg-white dark:bg-[#0B1528] dark:text-white text-slate-800 text-xs font-mono" placeholder="Secret Key (اختياري - اتركه فاضي)">
-                <button onclick="saveSendSettings()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl transition">
-                    <span class="lang-ar">حفظ</span><span class="lang-en">Save</span>
-                </button>
-                <button onclick="testConnection()" class="w-full py-2.5 bg-slate-100 dark:bg-[#132847] dark:text-slate-200 text-slate-800 border border-slate-300 dark:border-[#233d66] font-bold text-sm rounded-xl transition">
-                    <span class="lang-ar">اختبار الاتصال</span><span class="lang-en">Test Connection</span>
-                </button>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- نافذة الكاميرا -->
-    <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-3" style="height:100dvh">
-        <div class="w-full max-w-md bg-slate-900 rounded-2xl border border-slate-800 flex flex-col overflow-hidden" style="max-height:calc(100dvh - 24px)">
-            <div class="px-4 py-3 bg-slate-950 border-b border-slate-800 flex justify-between items-center shrink-0">
-                <h3 class="text-white font-bold text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-camera text-emerald-500"></i>
-                    <span class="lang-ar">مسح الباركود</span><span class="lang-en">Scan Barcode</span>
-                </h3>
-                <button onclick="closeQRCamera()" class="text-slate-300 hover:text-rose-400 bg-slate-800 px-3 py-1 rounded-lg transition font-bold text-sm">
-                    إغلاق
-                </button>
-            </div>
-            <div class="p-3 space-y-3 overflow-y-auto">
-                <div id="scan-status" class="p-2.5 rounded-xl bg-slate-800 text-slate-200 text-xs text-center leading-relaxed">وجّه الكاميرا للباركود...</div>
-                <div id="reader" class="w-full rounded-xl overflow-hidden border-2 border-emerald-500/30 bg-black"></div>
-                <div id="camera-error" class="hidden p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl text-rose-300 text-xs text-center leading-relaxed">
-                    لا يمكن الوصول للكاميرا. يرجى التأكد من إعطاء صلاحية الكاميرا للمتصفح.
-                </div>
-                <div>
-                    <div class="text-[11px] text-slate-400 mb-1.5 text-center">أو اختر الـ Bay يدوياً</div>
-                    <div class="grid grid-cols-4 gap-2" dir="ltr" id="bay-buttons"></div>
-                </div>
-                <button onclick="manualPlate()" class="w-full py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-200 border border-slate-700">
-                    <i class="fa-solid fa-keyboard text-emerald-500"></i> إدخال البوليصة يدوياً
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- شريط التنقل السفلي -->
-    <nav class="fixed bottom-0 w-full bg-white/95 dark:bg-[#0B1528]/95 backdrop-blur-lg border-t border-slate-200 dark:border-[#1E2E4A] pb-safe z-40">
-        <div class="max-w-md mx-auto flex items-center justify-around h-16">
-            <button id="nav-home" onclick="switchTab('home')" class="nav-btn flex flex-col items-center text-emerald-500 font-bold w-16 transition">
-                <i class="fa-solid fa-house text-lg mb-1"></i><span class="text-[10px] lang-ar">الرئيسية</span><span class="text-[10px] lang-en">Home</span>
-            </button>
-            <button id="nav-records" onclick="switchTab('records')" class="nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 w-16 transition">
-                <i class="fa-solid fa-clipboard-list text-lg mb-1"></i><span class="text-[10px] lang-ar">السجلات</span><span class="text-[10px] lang-en">Records</span>
-            </button>
-            <button id="nav-reports" onclick="switchTab('reports')" class="nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 w-16 transition">
-                <i class="fa-solid fa-chart-pie text-lg mb-1"></i><span class="text-[10px] lang-ar">التقارير</span><span class="text-[10px] lang-en">Reports</span>
-            </button>
-            <button id="nav-more" onclick="switchTab('more')" class="nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 w-16 transition">
-                <i class="fa-solid fa-ellipsis text-lg mb-1"></i><span class="text-[10px] lang-ar">المزيد</span><span class="text-[10px] lang-en">More</span>
-            </button>
-        </div>
-    </nav>
-
-    <!-- الأكواد البرمجية الشاملة -->
-    <script>
-        function toggleTheme() {
-            const htmlTag = document.getElementById('html-root');
-            const icon = document.getElementById('theme-icon');
-            if (htmlTag.classList.contains('dark')) {
-                htmlTag.classList.remove('dark');
-                try { localStorage.setItem('spcc_theme', 'light'); } catch(e) {}
-                icon.className = 'fa-solid fa-sun';
-            } else {
-                htmlTag.classList.add('dark');
-                try { localStorage.setItem('spcc_theme', 'dark'); } catch(e) {}
-                icon.className = 'fa-solid fa-moon';
-            }
-        }
-
-        (function() {
-            let savedTheme = null; try { savedTheme = localStorage.getItem('spcc_theme'); } catch(e) {}
-            const htmlTag = document.getElementById('html-root');
-            const icon = document.getElementById('theme-icon');
-            if (savedTheme === 'light') {
-                htmlTag.classList.remove('dark');
-                if(icon) icon.className = 'fa-solid fa-sun';
-            } else {
-                htmlTag.classList.add('dark');
-                if(icon) icon.className = 'fa-solid fa-moon';
-            }
-        })();
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => { el.classList.remove('block'); el.classList.add('hidden'); });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            document.getElementById('tab-' + tabId).classList.add('block');
-            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-emerald-500', 'font-bold'); btn.classList.add('text-slate-500', 'dark:text-slate-400'); });
-            const activeBtn = document.getElementById('nav-' + tabId);
-            activeBtn.classList.remove('text-slate-500', 'dark:text-slate-400'); activeBtn.classList.add('text-emerald-500', 'font-bold');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function toggleLanguage() {
-            const htmlTag = document.getElementById('html-root');
-            if (htmlTag.getAttribute('dir') === 'rtl') { htmlTag.setAttribute('dir', 'ltr'); htmlTag.setAttribute('lang', 'en'); } 
-            else { htmlTag.setAttribute('dir', 'rtl'); htmlTag.setAttribute('lang', 'ar'); }
-            renderLoaders(); renderRecordsTable();
-        }
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
-            document.getElementById('live-date').innerText = now.toISOString().split('T')[0];
-            const hours = now.getHours(); let shift = 'A';
-            if (hours >= 15 && hours < 23) shift = 'B'; else if (hours >= 23 || hours < 6) shift = 'C';
-            document.getElementById('shift-badge').innerText = 'Shift ' + shift;
-        }
-        setInterval(updateClock, 1000); updateClock();
-
-        // ===== التخزين الدائم: البيانات ما تنحذف إلا إذا حذفتها أنت =====
-        function bayName(id) { return `Bay ${id}`; }
-
-        let storageOk = true;
-
-        function safeLoad(key, fallback) {
-            try {
-                const raw = localStorage.getItem(key);
-                if (!raw) return fallback;
-                return JSON.parse(raw);
-            } catch (e) {
-                // لو البيانات تالفة نحتفظ بنسخة منها ولا نمسحها
-                try { localStorage.setItem(key + '_corrupt_backup', localStorage.getItem(key)); } catch (_) {}
-                return fallback;
-            }
-        }
-
-        let loadersData = safeLoad('spcc_loaders', null) || Array.from({length: 8}, (_, i) => ({
-            id: i + 1, name: `Bay ${i + 1}`, isActive: false, plate: '', type: 'OPC', bags: 600, startTime: null, driverName: '', driverPhone: ''
-        }));
-        let completedRecordsList = safeLoad('spcc_records', null) || [];
-        let kpi = safeLoad('spcc_kpi', null) || { completed: 0, bags: 0, tons: 0 };
-
-        function showStorageWarning() {
-            if (document.getElementById('storage-warning')) return;
-            const d = document.createElement('div');
-            d.id = 'storage-warning';
-            d.className = 'fixed top-0 inset-x-0 z-[60] bg-rose-600 text-white text-xs font-bold text-center p-2';
-            d.innerText = '⚠️ المتصفح لا يسمح بحفظ البيانات (قد تكون فتحت الملف من تطبيق أو وضع خاص). افتح الموقع من رابط ثابت في Chrome.';
-            document.body.appendChild(d);
-        }
-
-        function saveDataToStorage() {
-            try {
-                localStorage.setItem('spcc_loaders', JSON.stringify(loadersData));
-                localStorage.setItem('spcc_records', JSON.stringify(completedRecordsList));
-                localStorage.setItem('spcc_kpi', JSON.stringify(kpi));
-                storageOk = true;
-            } catch (e) {
-                storageOk = false;
-                showStorageWarning();
-            }
-        }
-
-        // حفظ إضافي عند إغلاق الصفحة أو تحديثها أو الخروج من التطبيق
-        window.addEventListener('pagehide', saveDataToStorage);
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDataToStorage(); });
-
-        // اطلب من المتصفح عدم حذف البيانات تلقائياً
-        if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(() => {}); }
-
-        // اختبار أن التخزين يعمل فعلاً
-        (function() { try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch (e) { storageOk = false; showStorageWarning(); } })();
-
-        function renderLoaders() {
-            const container = document.getElementById('loaders-container');
-            container.innerHTML = '';
-            let activeCount = 0;
-            const isAr = document.getElementById('html-root').getAttribute('dir') === 'rtl';
-
-            loadersData.forEach(ldr => {
-                if(ldr.isActive) activeCount++;
-                const cardHTML = ldr.isActive ? `
-                    <div class="rounded-2xl border border-emerald-500/60 bg-white dark:bg-[#0E223D] shadow-lg overflow-hidden flex flex-col">
-                        <div class="p-3 border-b border-slate-200 dark:border-[#1E2E4A] flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span class="font-bold text-sm dark:text-white text-slate-800">${bayName(ldr.id)}</span>
-                            </div>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40">
-                                ${ldr.type}
-                            </span>
-                        </div>
-                        <div class="p-3 flex-1 space-y-2 text-xs">
-                            <div class="flex justify-between items-center bg-slate-100 dark:bg-[#0B1528] p-2 rounded-xl">
-                                <span class="text-slate-500 dark:text-slate-400">${isAr ? 'رقم البوليصة:' : 'Order:'}</span>
-                                <span class="font-mono font-black text-sm dark:text-white text-slate-900">${ldr.plate}</span>
-                            </div>
-                            <div class="space-y-1 px-1">
-                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'السائق:' : 'Driver:'}</span><span class="font-bold dark:text-slate-200 text-slate-800">${ldr.driverName || '—'}</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'الهاتف:' : 'Phone:'}</span><span class="font-mono dark:text-slate-300 text-slate-700">${ldr.driverPhone || '—'}</span></div>
-                                ${ldr.vehicle ? `<div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'المركبة:' : 'Vehicle:'}</span><span class="font-mono dark:text-slate-300 text-slate-700">${ldr.vehicle}</span></div>` : ''}
-                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'الكمية:' : 'Quantity:'}</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">${ldr.bags} كيس (${(ldr.bags*0.05).toFixed(1)} MT)</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">${isAr ? 'وقت البدء:' : 'In Time:'}</span><span class="font-mono dark:text-slate-200 text-slate-700">${ldr.startTime}</span></div>
-                            </div>
-                        </div>
-                        <div class="p-2 border-t border-slate-200 dark:border-[#1E2E4A] grid grid-cols-2 gap-2">
-                            <button onclick="cancelLoader(${ldr.id})" class="py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-600 dark:text-rose-300 border border-rose-500/40 font-bold text-xs rounded-xl transition">
-                                <i class="fa-solid fa-ban"></i> ${isAr ? 'إلغاء' : 'Cancel'}
-                            </button>
-                            <button onclick="stopLoader(${ldr.id})" class="py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition">
-                                <i class="fa-solid fa-check-circle"></i> ${isAr ? 'إنهاء' : 'End'}
-                            </button>
-                        </div>
-                    </div>` : `
-                    <div class="rounded-2xl border border-slate-200 dark:border-[#1E2E4A]/80 bg-white dark:bg-[#0B1528] overflow-hidden flex flex-col opacity-90">
-                        <div class="p-3 border-b border-slate-200 dark:border-[#1E2E4A] flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-slate-400 dark:bg-slate-600"></span>
-                                <span class="font-bold text-sm dark:text-white text-slate-800">${bayName(ldr.id)}</span>
-                            </div>
-                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">
-                                ${isAr ? 'جاهز' : 'IDLE'}
-                            </span>
-                        </div>
-                        <div class="p-4 flex-1 text-center text-slate-400 dark:text-slate-500 text-xs flex flex-col items-center justify-center">
-                            <p>${isAr ? 'الرافعة جاهزة' : 'Loader Ready'}</p>
-                        </div>
-                        <div class="p-2 border-t border-slate-200 dark:border-[#1E2E4A]">
-                            <button onclick="startLoader(${ldr.id})" class="w-full py-2 bg-slate-100 dark:bg-[#132847] hover:bg-slate-200 dark:hover:bg-[#1a345b] dark:text-slate-200 text-slate-800 border border-slate-300 dark:border-[#233d66] text-xs font-semibold rounded-xl transition">
-                                <i class="fa-solid fa-keyboard text-emerald-500"></i> ${isAr ? 'إدخال يدوياً' : 'MANUAL START'}
-                            </button>
-                        </div>
-                    </div>`;
-                container.innerHTML += cardHTML;
-            });
-            document.getElementById('kpi-active').innerHTML = `${activeCount} <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">/ 8</span>`;
-            document.getElementById('kpi-completed').innerText = kpi.completed;
-            document.getElementById('kpi-bags').innerText = kpi.bags;
-            document.getElementById('kpi-tons').innerHTML = `${kpi.tons.toFixed(1)} <span class="text-xs text-slate-500 dark:text-slate-400 font-normal">MT</span>`;
-        }
-
-        function renderRecordsTable() {
-            const listContainer = document.getElementById('records-list');
-            const isAr = document.getElementById('html-root').getAttribute('dir') === 'rtl';
-
-            if (completedRecordsList.length === 0) {
-                listContainer.innerHTML = `
-                <div class="glass-card p-6 rounded-2xl text-center">
-                    <i class="fa-solid fa-folder-open text-4xl text-slate-400 dark:text-slate-600 mb-3"></i>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm">${isAr ? 'لا توجد سجلات حالياً.' : 'No records yet.'}</p>
-                </div>`;
-                return;
-            }
-
-            let html = '';
-            completedRecordsList.map((rec, idx) => ({ rec, idx })).reverse().forEach(({ rec, idx }) => {
-                html += `
-                <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500 space-y-2 text-xs">
-                    <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700/50 pb-2">
-                        <span class="font-bold text-sm dark:text-white text-slate-900">${rec.plate} (${rec.type})</span>
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded">Bay ${rec.loaderId}</span>
-                            <button onclick="deleteRecord(${idx})" class="text-rose-500 hover:text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-1 rounded-lg transition" title="حذف / Delete">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-y-1.5 text-slate-600 dark:text-slate-300">
-                        <div>${isAr ? 'السائق:' : 'Driver:'} <strong class="dark:text-white text-slate-900">${rec.driverName}</strong></div>
-                        <div>${isAr ? 'الهاتف:' : 'Phone:'} <strong class="font-mono">${rec.driverPhone}</strong></div>
-                        <div>${isAr ? 'الكمية:' : 'Qty:'} <strong class="text-emerald-600 dark:text-emerald-400">${rec.bags} كيس (${rec.tons} MT)</strong></div>
-                        <div>${isAr ? 'المشغل:' : 'Op:'} <strong class="dark:text-white text-slate-900">${rec.operator}</strong></div>
-                        <div>${isAr ? 'البدء:' : 'In:'} <span class="font-mono">${rec.startTime}</span></div>
-                        <div>${isAr ? 'الانتهاء:' : 'Out:'} <span class="font-mono text-amber-600 dark:text-amber-400">${rec.endTime}</span></div>
-                    </div>
-                </div>`;
-            });
-            listContainer.innerHTML = html;
-        }
-
-        const DEFAULT_EMAILS = "admin@spcc.com.sa,packhouse@spcc.com.sa";
-        function getSetting(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
-        function saveSendSettings() {
-            const url = document.getElementById('send-url').value.trim();
-            const key = document.getElementById('send-key').value.trim();
-            if (url && !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)) { alert('❌ الرابط غير صحيح، لازم ينتهي بـ /exec'); return; }
-            try { localStorage.setItem('spcc_send_url', url); localStorage.setItem('spcc_send_key', key); } catch (e) {}
-            alert('✅ تم حفظ إعدادات الربط');
-            seedCloud();
-            pullRecords();
-        }
-
-        // ===== المزامنة مع Google Sheet =====
-        function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-        function cloudUrl() { return getSetting('spcc_send_url'); }
-        function getPending() { try { return JSON.parse(localStorage.getItem('spcc_pending') || '[]'); } catch (e) { return []; } }
-        function setPending(a) { try { localStorage.setItem('spcc_pending', JSON.stringify(a)); } catch (e) {} }
-
-        function setCloudStatus(ok, sheetUrl) {
-            const el = document.getElementById('cloud-status');
-            if (!el) return;
-            if (!cloudUrl()) { el.classList.add('hidden'); return; }
-            el.classList.remove('hidden');
-            el.innerHTML = ok
-                ? '☁️ السجلات محفوظة في Google Sheet' + (sheetUrl ? ` — <a href="${sheetUrl}" target="_blank" class="text-emerald-500 underline">فتح الجدول</a>` : '')
-                : '⚠️ لا يوجد اتصال الآن، السجلات محفوظة على الجهاز وتُرسل تلقائياً لاحقاً';
-        }
-
-        async function cloudPost(payload) {
-            const res = await fetch(cloudUrl(), {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(Object.assign({ key: getSetting('spcc_send_key') }, payload))
-            });
-            const txt = await res.text();
-            try { return JSON.parse(txt); } catch (e) { throw new Error('NOT_JSON'); }
-        }
-
-        function explainError(e) {
-            if (e && e.message === 'NOT_JSON')
-                return 'الرابط رد بصفحة بدل البيانات. غالباً الكود ما انحفظ كنسخة جديدة (New version) أو ما أُعطيت الصلاحيات (شغّل setup).';
-            return 'المتصفح ما قدر يوصل للرابط. غالباً خيار Who has access ليس Anyone، أو الرابط ناقص/غلط، أو ما فيه إنترنت.';
-        }
-
-        async function testConnection() {
-            const url = cloudUrl();
-            if (!url) { alert('الصق رابط الـ /exec واضغط حفظ أولاً'); return; }
-            try {
-                const res = await fetch(url + '?action=list&key=' + encodeURIComponent(getSetting('spcc_send_key')));
-                const txt = await res.text();
-                let out; try { out = JSON.parse(txt); } catch (e) { throw new Error('NOT_JSON'); }
-                if (out.ok) alert('✅ الاتصال سليم. عدد السجلات في الجدول: ' + out.records.length);
-                else if (out.error === 'unauthorized') alert('⚠️ الرابط يعمل لكن الـ Secret Key غير مطابق للموجود في Code.gs');
-                else alert('⚠️ الرابط يعمل لكن فيه خطأ: ' + out.error);
-            } catch (e) { alert('❌ ' + explainError(e)); }
-        }
-
-        function enqueue(op) {
-            if (!cloudUrl()) return;
-            const q = getPending(); q.push(op); setPending(q);
-            flushPending();
-        }
-
-        let flushing = false;
-        async function flushPending() {
-            if (flushing || !cloudUrl()) return;
-            flushing = true;
-            try {
-                let q = getPending();
-                while (q.length) {
-                    const out = await cloudPost(q[0]);
-                    if (!out.ok) { setCloudStatus(false); break; }
-                    q.shift(); setPending(q);
-                }
-            } catch (e) { setCloudStatus(false); }
-            finally { flushing = false; }
-        }
-
-        // أول مرة: ارفع السجلات الموجودة على الجهاز إلى الجدول
-        function seedCloud() {
-            const url = cloudUrl();
-            if (!url || getSetting('spcc_seeded') === url) return;
-            const q = getPending();
-            completedRecordsList.forEach(r => {
-                if (!r.id) r.id = newId();
-                if (!r.date) r.date = new Date().toISOString().split('T')[0];
-                q.push({ action: 'add', record: r });
-            });
-            setPending(q);
-            saveDataToStorage();
-            try { localStorage.setItem('spcc_seeded', url); } catch (e) {}
-            flushPending();
-        }
-
-        // اسحب السجلات من الجدول (المصدر الأساسي)
-        async function pullRecords() {
-            if (!cloudUrl()) { setCloudStatus(false); return; }
-            await flushPending();
-            if (getPending().length) { setCloudStatus(false); return; }
-            try {
-                const res = await fetch(cloudUrl() + '?action=list&key=' + encodeURIComponent(getSetting('spcc_send_key')));
-                const out = await res.json();
-                if (!out.ok) { setCloudStatus(false); return; }
-                completedRecordsList = out.records;
-                kpi = {
-                    completed: out.records.length,
-                    bags: out.records.reduce((a, r) => a + (Number(r.bags) || 0), 0),
-                    tons: +out.records.reduce((a, r) => a + (Number(r.tons) || 0), 0).toFixed(2)
-                };
-                saveDataToStorage();
-                renderLoaders();
-                renderRecordsTable();
-                setCloudStatus(true, out.sheetUrl);
-            } catch (e) { setCloudStatus(false); }
-        }
-
-        async function sendEmailReport() {
-            if (completedRecordsList.length === 0) { alert("لا توجد سجلات مكتملة لإرسالها!"); return; }
-            const date = new Date().toISOString().split('T')[0];
-            const url = cloudUrl();
-
-            // إذا ما تم ضبط الربط: نفتح تطبيق البريد كحل بديل
-            if (!url) {
-                let bodyText = `تقرير الشحنات المكتملة ليوم ${date}\n\n`;
-                completedRecordsList.forEach((rec, i) => {
-                    bodyText += `${i + 1}. Bay ${rec.loaderId} | ${rec.plate} | ${rec.driverName} | ${rec.bags} كيس (${rec.tons} طن) | ${rec.operator} | ${rec.startTime} - ${rec.endTime}\n`;
-                });
-                window.location.href = `mailto:${DEFAULT_EMAILS}?subject=${encodeURIComponent('تقرير الشحنات - مصنع تهامة (' + date + ')')}&body=${encodeURIComponent(bodyText)}`;
-                return;
-            }
-
-            const btn = document.getElementById('send-btn');
-            const oldHtml = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
-            try {
-                await flushPending();               // تأكد أن كل السجلات وصلت للجدول أولاً
-                const out = await cloudPost({ action: 'email' });
-                if (out.ok) alert('✅ تم إرسال التقرير بنجاح');
-                else alert('❌ فشل الإرسال: ' + (out.error === 'unauthorized' ? 'الـ Secret Key غير صحيح' : out.error));
-            } catch (e) {
-                alert('❌ ' + explainError(e) + '\nجرّب زر "اختبار الاتصال" في تبويب المزيد.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = oldHtml;
-            }
-        }
-
-        let html5QrCode = null;
-        let isCameraActive = false;
-
-        function safeOpenQRCamera() {
-            if (window.isSecureContext === false) {
-                let manualData = prompt("أدخل رقم البوليصة:", "DW25KQ");
-                if (manualData) askForLoaderAndStart(manualData);
-                return;
-            }
-
-            document.getElementById('qr-modal').classList.remove('hidden');
-            document.getElementById('camera-error').classList.add('hidden');
-            resetScanState();
-            
-            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                {
-                    fps: 10,
-                    aspectRatio: 1.333,
-                    qrbox: function(w, h) { const m = Math.min(w, h); return { width: Math.floor(m * 0.9), height: Math.floor(m * 0.55) }; },
-                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
-                },
-                function onScanSuccess(decodedText) { handleScan(decodedText); },
-                function onScanFailure(error) {}
-            ).then(() => { isCameraActive = true; }).catch((err) => {
-                document.getElementById('camera-error').classList.add('hidden');
-            });
-        }
-
-        function closeQRCamera() {
-            document.getElementById('qr-modal').classList.add('hidden');
-            resetScanState();
-            if (html5QrCode && isCameraActive) {
-                html5QrCode.stop().then(() => { isCameraActive = false; html5QrCode.clear(); }).catch(err => {});
-            }
-        }
-
-        // يقرأ نص الباركود ويستخرج رقم الرافعة (Bay) ورقم البوليصة
-        function parseScan(text) {
-            let raw = String(text || '').trim();
-            // تحويل الأرقام العربية إلى إنجليزية
-            raw = raw.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-
-            const bayRe = /(?:tahama[\s\-_]*)?(?:bay|loader|الرافعة|رافعة)[\s\-_:#.]*0*([1-8])(?!\d)/i;
-            const m = raw.match(bayRe);
-            let bay = m ? parseInt(m[1], 10) : null;
-            // صيغ مختصرة: key=value مثل bay=8 أو رمز قصير مثل B8 / L-8 / 8
-            if (!bay) {
-                const kv = raw.match(/(?:bay|loader|line|lane|gate)\s*[=:]\s*0*([1-8])(?!\d)/i);
-                if (kv) bay = parseInt(kv[1], 10);
-            }
-            if (!bay) {
-                const short = raw.match(/^(?:[A-Za-z]{1,3}[\s\-_]?)?0*([1-8])$/);
-                if (short) bay = parseInt(short[1], 10);
-            }
-
-            // باركود البوليصة: 1|رقم البوليصة|كود|الأكياس|السائق|الجوال|المركبة
-            let plate = '', info = null;
-            if (raw.indexOf('|') !== -1) {
-                const f = raw.split('|').map(x => x.trim());
-                if (f.length >= 6) {
-                    const bags = parseInt(f[3], 10);
-                    plate = (f[1] || '').toUpperCase();
-                    info = { bags: bags > 0 ? bags : null, driverName: f[4] || '', driverPhone: f[5] || '', vehicle: f[6] || '' };
-                }
-            }
-            if (!plate) {
-                let rest = raw.replace(bayRe, ' ').replace(/tahama/ig, ' ');
-                const tokens = rest.toUpperCase().match(/[A-Z0-9][A-Z0-9\-\/]{3,19}/g) || [];
-                plate = tokens.find(t => /[A-Z]/.test(t) && /\d/.test(t)) || tokens[0] || '';
-            }
-            return { bay, plate, info };
-        }
-
-        // ===== مسح على خطوتين: باركود الـ Bay + باركود الشاحنة (أو الاثنين في باركود واحد) =====
-        let pendingBay = null, pendingPlate = '', pendingInfo = null, lastScanText = '', lastScanTime = 0;
-
-        function setScanStatus(html, ok) {
-            const el = document.getElementById('scan-status');
-            if (!el) return;
-            el.className = 'p-2.5 rounded-xl text-xs text-center leading-relaxed ' + (ok ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-200');
-            el.innerHTML = html;
-        }
-
-        function buildBayButtons() {
-            const box = document.getElementById('bay-buttons');
-            if (!box || box.children.length) return;
-            for (let i = 1; i <= 8; i++) {
-                const b = document.createElement('button');
-                b.textContent = 'Bay ' + i;
-                b.dataset.bay = i;
-                b.className = 'bay-btn py-2.5 rounded-lg bg-slate-800 text-white font-bold text-xs border border-slate-700 transition';
-                b.onclick = () => pickBay(i);
-                box.appendChild(b);
-            }
-        }
-
-        function resetScanState() {
-            pendingBay = null; pendingPlate = ''; pendingInfo = null; lastScanText = ''; lastScanTime = 0;
-            buildBayButtons();
-            setScanStatus('وجّه الكاميرا للباركود...', false);
-        }
-
-        function escHtml(t) { return String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
-
-        function highlightBay() {
-            document.querySelectorAll('#bay-buttons .bay-btn').forEach(b => {
-                const on = Number(b.dataset.bay) === pendingBay;
-                b.classList.toggle('bg-emerald-600', on);
-                b.classList.toggle('border-emerald-400', on);
-                b.classList.toggle('bg-slate-800', !on);
-            });
-        }
-
-        function updateScanProgress() {
-            highlightBay();
-            if (pendingBay && pendingPlate) { finishScan(pendingBay, pendingPlate); return; }
-            const raw = lastScanText ? `<div dir="ltr" class="mt-1 text-[10px] font-mono text-slate-400 break-all">${escHtml(lastScanText)}</div>` : '';
-            window.__raw = raw;
-            if (pendingBay) setScanStatus(`✅ <b>Bay ${pendingBay}</b> تم تحديده<br>الآن امسح باركود الشاحنة (البوليصة)${raw}`, true);
-            else if (pendingPlate) {
-                const d = pendingInfo ? `<br>${escHtml(pendingInfo.driverName)} · ${escHtml(pendingInfo.driverPhone)} · ${pendingInfo.bags || ''} كيس` : '';
-                setScanStatus(`✅ البوليصة <b>${escHtml(pendingPlate)}</b>${d}<br><b>اختر رقم الـ Bay من الأسفل</b>${raw}`, true);
-            }
-        }
-
-        function handleScan(text) {
-            const now = Date.now();
-            if (text === lastScanText && now - lastScanTime < 2500) return;   // تجاهل القراءة المكررة
-            lastScanText = text; lastScanTime = now;
-            try { localStorage.setItem('spcc_last_scan', text); } catch (e) {}
-
-            const parsed = parseScan(text);
-            if (parsed.bay) pendingBay = parsed.bay;
-            if (parsed.plate) pendingPlate = parsed.plate;
-            if (parsed.info) pendingInfo = parsed.info;
-            if (!parsed.bay && !parsed.plate) {
-                setScanStatus(`ما قدرت أفهم الباركود:<br><span dir="ltr" class="font-mono">${escHtml(text)}</span><br>اختر الـ Bay من الأسفل`, false);
-                return;
-            }
-            updateScanProgress();
-        }
-
-        function pickBay(n) { pendingBay = n; updateScanProgress(); }
-
-        function manualPlate() {
-            const p = prompt('أدخل رقم البوليصة:', '');
-            if (!p || !p.trim()) return;
-            pendingPlate = p.trim().toUpperCase();
-            updateScanProgress();
-        }
-
-        function finishScan(bay, plate) {
-            const info = pendingInfo;
-            const target = loadersData.find(l => l.id === bay);
-            closeQRCamera();
-            if (!target) { alert('❌ رقم Bay غير صحيح'); return; }
-            if (target.isActive) { alert(`⚠️ عذراً، الرافعة Bay ${bay} مشغولة حالياً!`); return; }
-            activateLoader(target, plate, info);
-            alert(`✅ تم توجيه البوليصة ${target.plate} إلى Bay ${bay}!`);
-        }
-
-        function activateLoader(ldr, plate, info) {
-            ldr.isActive = true;
-            ldr.plate = plate.toUpperCase();
-            ldr.type = "PAPER BAG CEMENT";
-            ldr.bags = (info && info.bags) ? info.bags : 600;
-            ldr.driverName = (info && info.driverName) ? info.driverName : '—';
-            ldr.driverPhone = (info && info.driverPhone) ? info.driverPhone : '—';
-            ldr.vehicle = (info && info.vehicle) ? info.vehicle : '';
-            ldr.startTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
-            saveDataToStorage();
-            renderLoaders();
-        }
-
-        function askForLoaderAndStart(decodedText) {
-            const parsed = parseScan(decodedText);
-
-            // 1) رقم الرافعة يؤخذ من الباركود أولاً (مثل: bay 8)
-            let targetId = parsed.bay;
-
-            // 2) رقم البوليصة
-            let plate = parsed.plate;
-            if (!plate) {
-                const p = prompt(`📷 تم مسح الباركود\nالنص المقروء: ${decodedText}\n\nلم أجد رقم البوليصة، أدخله:`, "");
-                if (!p || !p.trim()) return;
-                plate = p.trim().toUpperCase();
-            }
-
-            // 3) فقط إذا الباركود ما فيه bay نسأل عن رقم الرافعة
-            if (!targetId) {
-                const input = prompt(`📷 تم مسح الباركود بنجاح!\nالبوليصة: ${plate}\n\nلم أجد رقم الـ Bay في الباركود.\n👉 أدخل رقم الرافعة (من 1 إلى 8):`, "");
-                if (input === null) return;
-                targetId = parseInt(input.trim(), 10);
-            }
-
-            if (isNaN(targetId) || targetId < 1 || targetId > 8) {
-                alert("❌ رقم غير صحيح. يجب أن يكون بين 1 و 8.");
-                return;
-            }
-
-            const targetLoader = loadersData.find(l => l.id === targetId);
-            if (targetLoader.isActive) {
-                alert(`⚠️ عذراً، الرافعة Bay ${targetId} مشغولة حالياً!`);
-                return;
-            }
-
-            activateLoader(targetLoader, plate, parsed.info);
-            alert(`✅ تم توجيه البوليصة ${targetLoader.plate} إلى Bay ${targetId}!`);
-        }
-
-        function startLoader(id) {
-            const ldr = loadersData.find(l => l.id === id);
-            let p = prompt(`أدخل بوليصة الشحن لـ ${bayName(ldr.id)}:`, "DW25KQ");
-            if (p && p.trim()) { activateLoader(ldr, p.trim()); }
-        }
-
-        function cancelLoader(id) {
-            if (confirm(`هل أنت متأكد من إلغاء تحميل الرافعة Bay ${id}؟`)) {
-                const ldr = loadersData.find(l => l.id === id);
-                ldr.isActive = false;
-                ldr.plate = '';
-                ldr.startTime = null;
-                saveDataToStorage();
-                renderLoaders();
-            }
-        }
-
-        function stopLoader(id) {
-            const ldr = loadersData.find(l => l.id === id);
-            const endTime = new Date().toLocaleTimeString('en-US', { hour12: false }).substring(0, 5);
-            const operatorName = document.getElementById('operatorSelect').value;
-            const currentTons = +(ldr.bags * 0.05).toFixed(2);
-
-            completedRecordsList.push({
-                loaderId: ldr.id, 
-                plate: ldr.plate, 
-                bags: ldr.bags, 
-                tons: currentTons,
-                type: ldr.type,
-                driverName: ldr.driverName,
-                driverPhone: ldr.driverPhone,
-                startTime: ldr.startTime, 
-                endTime: endTime, 
-                operator: operatorName,
-                id: newId(),
-                date: new Date().toISOString().split('T')[0]
-            });
-            enqueue({ action: 'add', record: completedRecordsList[completedRecordsList.length - 1] });
-
-            ldr.isActive = false;
-            kpi.completed++; kpi.bags += ldr.bags; kpi.tons += currentTons;
-            
-            saveDataToStorage();
-            renderLoaders(); 
-            renderRecordsTable();
-        }
-
-        function deleteRecord(idx) {
-            const rec = completedRecordsList[idx];
-            if (!rec) return;
-            if (!confirm(`هل تريد حذف سجل البوليصة ${rec.plate}؟`)) return;
-            completedRecordsList.splice(idx, 1);
-            if (rec.id) enqueue({ action: 'delete', id: rec.id });
-            kpi.completed = Math.max(0, kpi.completed - 1);
-            kpi.bags = Math.max(0, kpi.bags - rec.bags);
-            kpi.tons = Math.max(0, +(kpi.tons - rec.tons).toFixed(2));
-            saveDataToStorage();
-            renderLoaders();
-            renderRecordsTable();
-        }
-
-        function clearAllRecords() {
-            if (completedRecordsList.length === 0) return;
-            if (!confirm("⚠️ هل أنت متأكد من حذف جميع السجلات؟ لا يمكن التراجع.")) return;
-            completedRecordsList = [];
-            enqueue({ action: 'clear' });
-            kpi = { completed: 0, bags: 0, tons: 0 };
-            saveDataToStorage();
-            renderLoaders();
-            renderRecordsTable();
-        }
-
-        document.getElementById('send-url').value = getSetting('spcc_send_url'); document.getElementById('send-key').value = getSetting('spcc_send_key');
-        renderLoaders();
-        renderRecordsTable();
-        seedCloud();
-        pullRecords();
-        setInterval(() => { if (document.visibilityState === 'visible') pullRecords(); }, 30000);
-    </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SPCC Tahama Cement Plant — Truck Loading Data</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#175CD3">
+<style>
+:root{--bg:#141a21;--card:#252e39;--in:#1b222b;--bd:#374151;--tx:#f1f5f9;--mu:#94a3b8;--ac:#0ea5e9;--g:#10b981;--r:#ef4444;--y:#f59e0b;--b:#3b82f6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme=light]{--bg:#eef2f7;--card:#fff;--in:#f1f5f9;--bd:#d5dce6;--tx:#0f172a;--mu:#64748b;color-scheme:light}
+:root{color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,"Segoe UI",Tahoma,sans-serif;padding-bottom:84px}
+button,input{font:inherit;color:inherit}button{cursor:pointer}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd);flex-wrap:wrap;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.logo{width:40px;height:40px;border-radius:50%;background:#fff;object-fit:contain;flex:none}
+.brand{line-height:1.15}.brand b{font-size:15px}.brand small{display:block;color:var(--ac);font-weight:700;font-size:10px;letter-spacing:.5px}
+.sp{flex:1}.chip{padding:3px 9px;border-radius:99px;border:1px solid var(--bd);font-size:11px;font-weight:700;background:var(--in)}
+.ib{height:36px;min-width:36px;padding:0 10px;border-radius:10px;border:1px solid var(--bd);background:var(--in)}
+.pri{background:#7ab4ff;color:#0b1220;font-weight:700;border:0}
+main{max-width:620px;margin:14px auto;padding:0 12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:16px;margin-bottom:14px}
+h2{font-size:15px;margin:0 0 2px;letter-spacing:.3px}.sub{color:var(--mu);font-size:11px}
+label{display:flex;justify-content:space-between;font-weight:700;font-size:12px;margin:14px 0 6px;color:var(--tx)}label i{color:var(--ac);font-style:normal;font-weight:500;font-size:11px}
+.in{width:100%;padding:12px;border-radius:12px;border:1px solid var(--bd);background:var(--in);outline:0}.in:focus{border-color:var(--ac)}
+.row{display:flex;gap:8px}.row>*{flex:1}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bt{padding:9px 4px;border-radius:12px;border:1px solid var(--bd);background:var(--in);text-align:center;font-weight:700;font-size:12px}
+.bt small{display:block;font-size:10px;color:var(--mu)}.bt.ok small{color:var(--g)}
+.bt.sel{border:2px solid var(--ac);background:#0b3a5e;color:#fff}.bt.blk{background:#3a1a1e;border-color:#7f1d1d;color:#fca5a5}.bt.blk small{color:var(--r)}
+.go{background:linear-gradient(90deg,#0284c7,#06b6d4);border:0;color:#fff;font-weight:800;border-radius:14px;padding:12px 16px}
+.gh{border:1px solid var(--bd);background:transparent;border-radius:14px;padding:12px 14px;font-weight:700}
+.stp{border:2px dashed #8a6a1c;border-radius:16px;padding:8px}.warn{color:var(--y);font-size:11px;margin-top:6px}
+.stat{padding:11px 13px;border-radius:12px;font-weight:800;display:flex;justify-content:space-between;border:1px solid var(--g);background:#0f3a2c;color:var(--g)}
+.stat.o{border-color:var(--y);background:#3b2d0c;color:var(--y)}.stat.l{border-color:var(--ac);background:#0b3a5e;color:var(--ac)}
+.dur{display:flex;justify-content:space-between;background:var(--in);border:1px solid var(--bd);border-radius:12px;padding:11px 13px;margin-top:10px;font-family:monospace}
+.bay{padding:10px;border-radius:16px;background:var(--in);border:1px solid var(--bd);min-height:86px;font-size:11px;color:var(--mu)}
+.bay b{color:var(--tx);font-size:13px}.bay .s{display:block;font-weight:800;margin:6px 0 2px}.bay.blk{background:#3a1a1e;border-color:#7f1d1d}
+.pk{padding:7px 3px;border-radius:10px;background:var(--in);border:1px solid var(--bd);text-align:center;font-size:10px}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:13px;border-radius:14px;background:var(--in);border:1px solid var(--bd);margin-bottom:8px;font-weight:700}
+.kv span:last-child{font:800 20px monospace}.H{font-size:11px;font-weight:800;color:var(--mu);margin:14px 0 8px;letter-spacing:.4px}
+.o1{color:var(--b)}.o2{color:var(--g)}.o3{color:var(--y)}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.chips button{white-space:nowrap;padding:7px 13px;border-radius:99px;border:1px solid var(--bd);background:var(--in)}.chips .on{background:#0284c7;border-color:#0284c7;color:#fff;font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:8px;height:170px;border-bottom:1px solid var(--bd);padding-top:10px}.bars div{flex:1;background:#7ab4ff;border-radius:8px 8px 0 0;min-height:2px;position:relative}
+.bars div em{position:absolute;top:-16px;width:100%;text-align:center;font-size:10px;font-style:normal;color:var(--mu)}
+.xl{display:flex;gap:8px;color:var(--mu);font-size:11px;text-align:center;margin-top:4px}.xl span{flex:1}
+table{width:100%;border-collapse:collapse;font-size:12px}th{color:var(--mu);font-size:10px;text-align:start;padding:8px 4px}td{padding:9px 4px;border-top:1px solid var(--bd)}
+.pb{height:6px;background:var(--in);border-radius:9px;overflow:hidden;min-width:44px}.pb i{display:block;height:100%;background:var(--ac)}
+.k4{display:grid;grid-template-columns:1fr 1fr;gap:8px}.k4 div{background:var(--in);border:1px solid var(--bd);border-radius:14px;padding:11px}.k4 small{color:var(--mu);font-size:10px;font-weight:700}.k4 b{display:block;font:800 20px monospace}
+nav{position:fixed;bottom:0;inset-inline:0;background:var(--card);border-top:1px solid var(--bd);display:flex;justify-content:center;gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:6}
+nav button{flex:1;max-width:120px;background:none;border:0;color:var(--mu);font-size:11px;font-weight:700;position:relative;padding:6px 0}nav button.on{color:#7ab4ff}nav button span{display:block;font-size:18px}
+nav sup{position:absolute;top:0;inset-inline-end:14px;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:0 5px;font-size:9px;color:var(--tx)}
+dialog{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:20px;width:min(92vw,380px)}dialog::backdrop{background:#0009}
+.donut{display:block;margin:6px auto}
+[dir=rtl] body{font-family:Tahoma,system-ui,sans-serif}
+</style></head><body>
+<header><img class="logo" alt="SPCC" src="data:image/png;base64,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"><div class="brand"><b>SPCC <span style="font-weight:400;font-size:12px" id="plant"></span></b><small id="ttl"></small></div><span class="chip" id="shb" style="color:var(--y)"></span><span class="chip" id="clk"></span><div class="sp"></div>
+<button class="ib" id="bR" title="Refresh">⟳</button><button class="ib" id="bT">☀</button><button class="ib" id="bL">عربي</button><button class="ib" id="bI" hidden>⭳</button><button class="ib pri" id="bS"></button></header>
+<main id="m"></main>
+<nav id="nv"></nav>
+<dialog id="dg"><h2 id="dt"></h2><label id="dl1"></label><input class="in" id="nm" maxlength="30"><label id="dl2"></label><div class="row"><button class="bt" id="rO"></button><button class="bt" id="rA"></button></div><div class="row" style="margin-top:16px"><button class="gh" id="dc"></button><button class="go" id="dk"></button></div></dialog>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const D={en:{plant:'Tahama Cement Plant',ttl:'TRUCK LOADING DATA',form:'TRUCK ENTRY DISPATCH FORM',co:'Southern Province Cement Co. • Tahama Plant',scan:'SCAN TRUCK QR',rcp:'RECEIPT NUMBER (E.G. 10003004)',shift:'SHIFT',calc:'Calculated from start time',op:'OPERATOR NAME',lock:'Locked to user',signed:'Signed in',need:'Sign in first',ld:'LOADER NUMBER',pk:'CONNECTING PACKER',st:'START TIME',en:'END TIME',now:'Set Now',dur:'Loading Duration:',stp:'STOPPAGE REASON',comp:'SELECTION COMPULSORY',none:'NONE',mech:'MECHANICAL',inst:'INSTRUMENT',prod:'PRODUCTION',wr:'Stoppage selection is compulsory. Please select None, Mechanical, Instrument, or Production.',status:'STATUS',done:'COMPLETED',stopd:'STOPPED / DELAYED',run:'LOADING',clr:'Clear Form',ds:'Direct Save',start:'START LOADING TRUCK',ready:'READY',blocked:'BLOCKED',tap:'Tap to Select',fin:'Tap to finish',sel:'Selected in Form',entry:'Truck Entry',dash:'Dashboard',ldr:'Loaders',ana:'Analytics',srch:'Search...',all:'All Records',today:'Today (KSA)',yest:'Yesterday',wk:'This Week',mo:'This Month',mon:'LIVE LOADER BAY MONITOR (L-1 TO L-8)',pu:'PACKER UNIT CONTROL (P-1 TO P-8)',main:'MAIN DASH BOARD',logged:'trucks logged',tc:'TRUCK COUNTS BY CEMENT TYPE',bv:'BAG VOLUMES',tl:'TONNAGE LOADED (METRIC TONS)',tot:'OVERALL PLANT TOTALS',tr:'TRUCKS',bg:'BAGS',tn:'TONS',perf:'AUTO LOADER PERFORMANCE',lp:'LOADER PERFORMANCE (TRUCK COUNTS)',br:'LOADER THROUGHPUT BREAKDOWN',util:'UTILIZATION',intel:'DISPATCH INTELLIGENCE',exp:'Export CSV',out:'TOTAL OUTPUT',rel:'RELIABILITY',turn:'AVG TURNAROUND',spd:'LOADING SPEED',mix:'CEMENT MIX & PRODUCT BREAKDOWN',sv:'SHIFT DISPATCH VOLUMES & OUTPUT',clean:'Clean',si:'Sign In',so:'Sign Out',nm:'Your name',role:'Role',ro:'Operator',ra:'Admin',cancel:'Cancel',ok:'Continue',saved:'Saved',req:'Fill QR, loader, packer and stoppage first',endr:'End time is required for Direct Save',dup:'This receipt is already in a loading bay',rsn:'Block reason?',set:'Settings',bagsT:'Bags per truck',kg:'Bag weight (kg)',stops:'STOPPAGES',blk:'BLOCKED',ldn:'Bays Loading',empty:'No records yet'},
+ar:{plant:'مصنع أسمنت تهامة',ttl:'بيانات تحميل الشاحنات',form:'نموذج إدخال الشاحنة',co:'شركة أسمنت المنطقة الجنوبية • مصنع تهامة',scan:'مسح QR للشاحنة',rcp:'رقم الإيصال (مثال 10003004)',shift:'الوردية',calc:'محسوبة من وقت البدء',op:'اسم المشغّل',lock:'مقفل للمستخدم',signed:'مسجّل الدخول',need:'سجّل الدخول أولاً',ld:'رقم المحمّل',pk:'الباكر المتصل',st:'وقت البدء',en:'وقت الانتهاء',now:'الآن',dur:'مدة التحميل:',stp:'سبب التوقف',comp:'الاختيار إجباري',none:'لا يوجد',mech:'ميكانيكي',inst:'أجهزة قياس',prod:'إنتاج',wr:'اختيار التوقف إجباري. اختر لا يوجد أو ميكانيكي أو أجهزة أو إنتاج.',status:'الحالة',done:'مكتمل',stopd:'متوقف / متأخر',run:'قيد التحميل',clr:'مسح النموذج',ds:'حفظ مباشر',start:'بدء تحميل الشاحنة',ready:'جاهز',blocked:'موقوف',tap:'اضغط للاختيار',fin:'اضغط للإنهاء',sel:'مختار في النموذج',entry:'إدخال شاحنة',dash:'اللوحة',ldr:'المحمّلات',ana:'التحليلات',srch:'بحث...',all:'كل السجلات',today:'اليوم',yest:'أمس',wk:'هذا الأسبوع',mo:'هذا الشهر',mon:'مراقبة المحمّلات (L-1 إلى L-8)',pu:'التحكم بالباكرات (P-1 إلى P-8)',main:'اللوحة الرئيسية',logged:'شاحنة مسجلة',tc:'عدد الشاحنات حسب النوع',bv:'كميات الأكياس',tl:'الأطنان المحمّلة',tot:'إجمالي المصنع',tr:'الشاحنات',bg:'الأكياس',tn:'الأطنان',perf:'أداء المحمّلات الآلية',lp:'أداء المحمّلات (عدد الشاحنات)',br:'تفصيل إنتاجية المحمّلات',util:'الاستخدام',intel:'ذكاء الإرسال',exp:'تصدير CSV',out:'إجمالي الإنتاج',rel:'الاعتمادية',turn:'متوسط الدورة',spd:'سرعة التحميل',mix:'توزيع أنواع الأسمنت',sv:'حجم الورديات والإنتاج',clean:'نظيف',si:'دخول',so:'خروج',nm:'اسمك',role:'الصلاحية',ro:'مشغّل',ra:'مدير',cancel:'إلغاء',ok:'متابعة',saved:'تم الحفظ',req:'عبّئ QR والمحمّل والباكر وسبب التوقف',endr:'وقت الانتهاء مطلوب للحفظ المباشر',dup:'هذا الإيصال قيد التحميل',rsn:'سبب الإيقاف؟',set:'الإعدادات',bagsT:'أكياس الشاحنة',kg:'وزن الكيس (كجم)',stops:'التوقفات',blk:'موقوف',ldn:'محمّلات تعمل',empty:'لا سجلات بعد'}};
+const PC=['OPC','OPC','PPC','OPC','GU','GU','OPC','OPC'],CT=['OPC','GU','PPC'],CL={OPC:'o1',GU:'o2',PPC:'o3'},CN={OPC:'Ordinary Portland Cement',GU:'General Use Cement',PPC:'Portland Pozzolana Cement'};
+const SHEET_URL='https://script.google.com/macros/s/AKfycbyF7HjRDLRgk9ZBRUOcLA76lnYrc_1aUR_l34IBdSiAhpvJFwLNu6Zy8OdEh6CzXfNPsA/exec';
+let S={recs:[],blk:{L:{},P:{}},user:null,cfg:{bags:600,kg:50},lang:'en',theme:'dark'},F={qr:'',L:null,P:null,s:'',e:'',stop:''},pg='entry',fl='all',q='',tick;
+try{Object.assign(S,JSON.parse(localStorage.getItem('spcc')||'{}'))}catch(e){}
+const sv=()=>{try{localStorage.setItem('spcc',JSON.stringify(S))}catch(e){}},T=k=>D[S.lang][k]||k;
+const f12=t=>{if(!t)return'';let[h,m,q]=t.split(':');const p=h>=12?'PM':'AM';return String(h%12||12).padStart(2,'0')+':'+m+':'+q+' '+p};
+const nowT=()=>new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Riyadh'}),hr=()=>+nowT().slice(0,2);
+const shiftOf=h=>h>=7&&h<15?'A':h>=15&&h<23?'B':'C',sec=t=>t?t.split(':').reduce((a,v)=>a*60+ +v,0):0;
+const durS=(s,e)=>{if(!s||!e)return 0;let d=sec(e)-sec(s);return d<0?d+86400:d},hms=n=>[n/3600|0,n%3600/60|0,n%60].map(v=>String(v).padStart(2,'0')).join(':');
+const dk=t=>new Date(t+10800000).toISOString().slice(0,10),fmt=n=>Math.round(n*10)/10;
+function filt(){const n=Date.now(),td=dk(n);return S.recs.filter(r=>fl=='all'||(fl=='today'&&dk(r.t)==td)||(fl=='yest'&&dk(r.t)==dk(n-864e5))||(fl=='wk'&&n-r.t<6048e5)||(fl=='mo'&&n-r.t<2592e6))}
+const bags=r=>r.bags||S.cfg.bags,tons=r=>bags(r)*S.cfg.kg/1000;
+const busy=L=>S.recs.find(r=>r.L==L&&!r.e);
+function sum(a){const o={};CT.forEach(c=>{const x=a.filter(r=>r.ct==c);o[c]={n:x.length,b:x.reduce((s,r)=>s+bags(r),0),t:x.reduce((s,r)=>s+tons(r),0)}});o.n=a.length;o.b=a.reduce((s,r)=>s+bags(r),0);o.t=a.reduce((s,r)=>s+tons(r),0);return o}
+const bt=(c,t,s,x='')=>`<button class="bt ${c}" ${x}>${t}<small>${s}</small></button>`;
+function toast(m){const d=document.createElement('div');d.textContent=m;d.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#0f3a2c;color:#6ee7b7;border:1px solid #10b981;padding:10px 16px;border-radius:12px;z-index:20;font-weight:700';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+function entry(){const sh=shiftOf(hr()),u=S.user,cx=F.P?PC[F.P-1]:'—',du=durS(F.s,F.e),stt=!F.e?'l':F.stop&&F.stop!='none'?'o':'';
+return`<div class="card"><div class="row" style="align-items:center"><div><h2>${T('form')}</h2><div class="sub">${T('co')}</div></div><span class="chip" style="flex:none;color:var(--ac)">⚡ ${sh} ${T('shift')}</span></div>
+<label>${T('scan')} *</label><div class="row"><input class="in" id="fq" placeholder="${T('rcp')}" value="${esc(F.qr)}" inputmode="numeric" style="flex:1"><button class="go" id="fs" style="flex:none;width:52px;border-radius:14px;display:grid;place-items:center" aria-label="Scan QR"><i style="width:14px;height:14px;background:#fff;border-radius:3px;display:block;pointer-events:none"></i></button></div>
+<label>${T('shift')}<i>${T('calc')}</i></label><div class="in" style="color:#7ab4ff;font-weight:800">${sh} ${T('shift')}</div>
+<label>${T('op')} *<i>🔒 ${T('lock')}</i></label><div class="in" style="font-weight:800">${u?esc(u.name)+' <span class="chip" style="color:var(--g)">'+T('signed')+'</span>':'<span style="color:var(--mu)">'+T('need')+'</span>'}</div>
+<label>${T('ld')}*</label><div class="g4">${[1,2,3,4,5,6,7,8].map(i=>{const b=S.blk.L[i],y=busy(i);return bt(b?'blk':F.L==i?'sel':y?'':'ok','L-'+i,b?T('blocked'):y?T('run'):T('ready'),`data-l="${i}"`)}).join('')}</div>
+<label>${T('pk')}*<i style="background:var(--in);padding:3px 9px;border-radius:99px">${cx}</i></label><div class="g4">${PC.map((c,i)=>bt(S.blk.P[i+1]?'blk':F.P==i+1?'sel':'','P-'+(i+1)+(S.blk.P[i+1]?' 🔒':''),S.blk.P[i+1]?T('blocked'):c,`data-p="${i+1}"`)).join('')}</div>
+<div class="row"><div><label>${T('st')} *<i class="a" data-n="s" style="cursor:pointer">${T('now')}</i></label><input class="in" id="fa" value="${f12(F.s)}" placeholder="hh:mm:ss AM" readonly></div><div><label>${T('en')} *<i class="a" data-n="e" style="cursor:pointer">${T('now')}</i></label><input class="in" id="fe" value="${f12(F.e)}" placeholder="hh:mm:ss PM" readonly></div></div>
+<div class="dur"><span style="font-family:inherit">${T('dur')}</span><b id="du">${hms(du)}</b></div>
+<label>${T('stp')} *<i style="border:1px solid #8a6a1c;color:var(--y);padding:2px 7px;border-radius:6px">${T('comp')}</i></label><div class="stp g4">${['none','mech','inst','prod'].map(k=>`<button class="bt ${F.stop==k?'sel':''}" data-s="${k}">${T(k)}</button>`).join('')}</div>${F.stop?'':'<div class="warn">⚠ '+T('wr')+'</div>'}
+<label>${T('status')}</label><div class="stat ${stt}"><span>● ${stt=='l'?T('run'):stt=='o'?T('stopd'):T('done')}</span></div>
+<div class="row" style="margin-top:16px;align-items:stretch"><button class="gh" id="fc" style="flex:none">${T('clr')}</button><button class="gh" id="fd" style="flex:none">${T('ds')}</button><button class="go" id="fg">⚡ ${T('start')}${F.L?' (L-'+F.L+')':''}</button></div></div>`}
+function dash(){const a=filt().filter(r=>!q||(r.qr+r.op+r.ct).toLowerCase().includes(q.toLowerCase())),m=sum(a),adm=S.user&&S.user.role=='admin',nb=Object.keys(S.blk.L).length,np=Object.keys(S.blk.P).length,ld=[1,2,3,4,5,6,7,8].filter(i=>busy(i)).length;
+return`<input class="in" id="fz" placeholder="${T('srch')}" value="${esc(q)}">${chips()}
+<div class="card"><h2>🔥 ${T('mon')} <span class="chip">${ld} ${T('ldn')}</span> ${nb?'<span class="chip" style="color:var(--r)">🔒 '+nb+' '+T('blk')+'</span>':''}</h2><div class="sub">Standard loading time: 23 – 30 min per truck</div><div class="g4" style="margin-top:12px">${[1,2,3,4,5,6,7,8].map(i=>{const b=S.blk.L[i],y=busy(i);return`<div class="bay ${b?'blk':''}" data-b="${i}" style="${F.L==i?'border:2px solid #7ab4ff;background:#16365a':''}"><b>L-${i}</b> ${b?'🔒':'<span style="color:var(--g)">●</span>'}<span class="s" style="color:${b?'var(--r)':y?'var(--y)':'var(--g)'}">${b?T('blocked'):y?T('run'):T('ready')}</span>${b?esc(b.r)+'<br>By: '+esc(b.by):y?'#'+esc(y.qr)+'<br>'+T('fin'):F.L==i?T('sel'):T('tap')}</div>`}).join('')}</div>
+<div class="H" style="margin-top:16px">${T('pu')} ${np?'<span class="chip" style="color:var(--r)">🔒 '+np+' '+T('blk')+'</span>':''}</div><div class="g4" style="grid-template-columns:repeat(8,1fr);gap:4px">${PC.map((c,i)=>{const b=S.blk.P[i+1];return`<div class="pk ${b?'blk':''}" data-pb="${i+1}" style="${b?'background:#3a1a1e;border-color:#7f1d1d':''}"><b>P-${i+1}</b><br><span class="${CL[c]}">${c}</span><br><span style="color:${b?'var(--r)':'var(--g)'}">${b?T('blocked'):T('ready')}</span></div>`}).join('')}</div></div>
+<div class="card"><h2>${T('main')} <span class="sub" style="float:inline-end;font-family:monospace">${m.n} ${T('logged')}</span></h2><div class="H">${T('tc')}</div>${CT.map(c=>`<div class="kv"><span>${c} ${T('tr')}<br><small class="sub">${CN[c]}</small></span><span class="${CL[c]}">${m[c].n}</span></div>`).join('')}
+<div class="H">${T('bv')} (${S.cfg.kg} KG)</div>${CT.map(c=>`<div class="kv"><span>${c} ${T('bg')}</span><span class="${CL[c]}">${m[c].b.toLocaleString()}</span></div>`).join('')}
+<div class="H">${T('tl')}</div>${CT.map(c=>`<div class="kv"><span>${c} ${T('tn')}</span><span class="${CL[c]}">${fmt(m[c].t).toLocaleString()} T</span></div>`).join('')}
+<div class="H">${T('tot')}</div><div class="g3">${[[T('tr'),m.n,''],[T('bg'),m.b.toLocaleString(),'o2'],[T('tn'),fmt(m.t).toLocaleString(),'']].map(x=>`<div class="kv" style="display:block"><small class="sub">${x[0]}</small><br><span class="${x[2]}" style="font-size:18px">${x[1]}</span></div>`).join('')}</div>
+${adm?'<div class="H">'+T('set')+'</div><div class="row"><div><label>'+T('bagsT')+'</label><input class="in" id="cb" type="number" value="'+S.cfg.bags+'"></div><div><label>'+T('kg')+'</label><input class="in" id="ck" type="number" value="'+S.cfg.kg+'"></div></div><label>Excel / Google Sheet (Apps Script URL)</label><input class="in" id="cu" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec" value="'+esc(S.cfg.url||'')+'">':''}</div>`}
+function chips(){return`<div class="chips">${[['all','all'],['today','today'],['yest','yest'],['wk','wk'],['mo','mo']].map(x=>`<button class="${fl==x[0]?'on':''}" data-f="${x[0]}">${T(x[1])}</button>`).join('')}</div>`}
+function ldrs(){const a=filt(),max=Math.max(1,...[1,2,3,4,5,6,7,8].map(i=>a.filter(r=>r.L==i).length)),tot=Math.max(1,a.length);
+return`<div class="card"><h2>${T('perf')}</h2><div class="sub">${T('co')}</div><div class="H">${T('lp')}</div><div class="bars">${[1,2,3,4,5,6,7,8].map(i=>{const n=a.filter(r=>r.L==i).length;return`<div style="height:${n/max*100}%"><em>${n}</em></div>`}).join('')}</div><div class="xl">${[1,2,3,4,5,6,7,8].map(i=>'<span>'+i+'</span>').join('')}</div>
+<div class="H">${T('br')}</div><table><tr><th>LOADER<th>${T('tr')}<th>${T('bg')}<th>${T('tn')}<th>${T('util')}</tr>${[1,2,3,4,5,6,7,8].map(i=>{const x=a.filter(r=>r.L==i),n=x.length,p=Math.round(n/tot*100);return`<tr><td style="color:var(--ac);font-weight:800">L-${i}<td><b>${n}</b><td>${x.reduce((s,r)=>s+bags(r),0).toLocaleString()}<td>${fmt(x.reduce((s,r)=>s+tons(r),0))} T<td><div class="pb"><i style="width:${p}%"></i></div>${p}%</tr>`}).join('')}</table></div>`}
+function ana(){const a=filt(),m=sum(a),cl=a.filter(r=>r.e),ok=a.filter(r=>r.stop=='none').length,ts=cl.reduce((s,r)=>s+durS(r.s,r.e),0),avg=cl.length?ts/cl.length/60:0,spd=ts?m.b/(ts/60):0,C={OPC:'#3b82f6',GU:'#10b981',PPC:'#f59e0b'};let off=0;
+const ring=CT.map(c=>{const p=m.n?m[c].n/m.n*100:0,e=`<circle r="15.9" cx="21" cy="21" fill="none" stroke="${C[c]}" stroke-width="5" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${-off}"/>`;off+=p;return e}).join('');
+const sh=['A','B','C'].map(s=>{const x=a.filter(r=>r.sh==s);return{s,n:x.length,t:fmt(x.reduce((q,r)=>q+tons(r),0)),c:x.length?Math.round(x.filter(r=>r.stop=='none').length/x.length*100):0}}),mx=Math.max(1,...sh.map(x=>x.n)),st=['mech','inst','prod'].map(k=>[k,a.filter(r=>r.stop==k).length]);
+return`<div class="card"><div class="row" style="align-items:center"><div><h2>${T('intel')}</h2><div class="sub">${m.n} ${T('logged')}</div></div><button class="go" id="ex" style="flex:none;padding:9px 14px">⭳ ${T('exp')}</button></div><div class="row" style="margin-top:10px"><button class="gh" id="em">📧 ${S.lang=='ar'?'أرسل Excel للإيميل':'Email Excel now'}</button><button class="gh" id="gs">📄 Google Sheet</button></div>${chips()}
+<div class="k4"><div><small>${T('out')}</small><b>${fmt(m.t).toLocaleString()} MT</b><small>${m.b.toLocaleString()} ${T('bg')}</small></div><div><small>${T('rel')}</small><b style="color:var(--g)">${a.length?Math.round(ok/a.length*100):0}%</b><small>${ok} smooth</small></div><div><small>${T('turn')}</small><b>${fmt(avg)} min</b></div><div><small>${T('spd')}</small><b>${fmt(spd)} bag/m</b></div></div></div>
+<div class="card"><h2>${T('mix')}</h2><svg class="donut" width="190" height="190" viewBox="0 0 42 42" style="transform:rotate(-90deg)"><circle r="15.9" cx="21" cy="21" fill="none" stroke="var(--in)" stroke-width="5"/>${ring}</svg><div class="g3">${CT.map(c=>`<div class="kv" style="display:block;text-align:center"><small class="sub">${c}</small><br><span class="${CL[c]}" style="font-size:18px">${m.n?Math.round(m[c].n/m.n*100):0}%</span><br><small class="sub">${m[c].n} • ${fmt(m[c].t)} MT</small></div>`).join('')}</div></div>
+<div class="card"><h2>${T('sv')}</h2><div class="sub">8-Hour Operational Shifts</div><div class="bars" style="margin-top:14px">${sh.map(x=>`<div style="height:${x.n/mx*100}%;background:#3b82f6"><em>${x.n}</em></div>`).join('')}</div><div class="xl">${sh.map(x=>'<span>'+x.s+' '+T('shift')+'</span>').join('')}</div><div class="g3" style="margin-top:12px">${sh.map(x=>`<div class="kv" style="display:block;text-align:center"><small class="sub">${x.s} ${T('shift')}</small><br><b>${x.n} ${T('tr')}</b><br><small class="sub">${x.t} MT</small><br><small style="color:var(--g)">${x.c}% ${T('clean')}</small></div>`).join('')}</div>
+<div class="H">${T('stops')}</div>${st.map(x=>`<div class="kv"><span>${T(x[0])}</span><span>${x[1]}</span></div>`).join('')}</div>`}
+function render(){const keep=document.activeElement&&document.activeElement.id,v=document.activeElement&&document.activeElement.value;
+document.documentElement.lang=S.lang;document.documentElement.dir=S.lang=='ar'?'rtl':'ltr';document.documentElement.dataset.theme=S.theme;
+$('plant').textContent=T('plant');$('ttl').textContent=T('ttl');$('bS').textContent=S.user?T('so'):T('si');$('bL').textContent=S.lang=='ar'?'EN':'عربي';$('bT').textContent=S.theme=='dark'?'☀':'☾';
+$('m').innerHTML={entry,dash,ldrs,ana}[pg]();
+$('nv').innerHTML=[['entry','⊕'],['dash','▦'],['ldrs','▮'],['ana','↗']].map(x=>`<button class="${pg==x[0]?'on':''}" data-pg="${x[0]}"><span>${x[1]}</span>${T(x[0]=='ldrs'?'ldr':x[0]=='ana'?'ana':x[0])}${x[0]=='dash'&&S.recs.length?'<sup>'+(S.recs.length>99?'99+':S.recs.length)+'</sup>':''}</button>`).join('');
+if(keep&&$(keep)&&$(keep).tagName=='INPUT'){$(keep).focus()}}
+function clock(){const h=hr();$('clk').textContent='🕒 '+f12(nowT())+' KSA | Asia/Riyadh';$('shb').textContent=shiftOf(h)+' '+T('shift');const d=$('du');if(d&&F.s&&!F.e)d.textContent=hms(durS(F.s,nowT()))}
+function save(done){if(!S.user)return toast(T('need'));if(!F.qr||!F.L||!F.P||!F.stop)return toast(T('req'));if(done&&!F.e)return toast(T('endr'));if(busy(F.L)||S.recs.find(r=>r.qr==F.qr&&!r.e))return toast(T('dup'));
+const s=F.s||nowT();S.recs.unshift({id:Date.now(),t:Date.now(),qr:F.qr,sh:shiftOf(hr()),op:S.user.name,L:F.L,P:F.P,ct:PC[F.P-1],s,e:done?F.e:'',stop:F.stop});F={qr:'',L:null,P:null,s:'',e:'',stop:''};sv();push(S.recs[0]);toast(T('saved'));render()}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-l],[data-p],[data-s],[data-n],[data-f],[data-pg],[data-b],[data-pb],button,i.a');if(!t)return;const d=t.dataset;
+if(d.pg){pg=d.pg;return render()}if(d.f){fl=d.f;return render()}
+if(d.l){if(!S.blk.L[d.l])F.L=+d.l;return render()}if(d.p){if(!S.blk.P[d.p])F.P=+d.p;return render()}if(d.s){F.stop=d.s;return render()}
+if(d.n){F[d.n]=nowT();return render()}
+if(d.b){const i=d.b,y=busy(i),adm=S.user&&S.user.role=='admin';if(S.blk.L[i]){if(adm){delete S.blk.L[i];sv();pushB()}}else if(y){y.e=nowT();sv();push(y)}else if(adm&&e.target.closest('.bay').offsetWidth&&e.detail>0&&confirm('Block L-'+i+'?')){const r=prompt(T('rsn'),'Mechanical under maintenance');if(r){S.blk.L[i]={r,by:S.user.name};sv();pushB()}}else F.L=+i;return render()}
+if(d.pb){const i=d.pb;if(S.blk.P[i]){if(S.user&&S.user.role=='admin')delete S.blk.P[i]}else if(S.user&&S.user.role=='admin'&&confirm('Block P-'+i+'?')){const r=prompt(T('rsn'),'Auto-Loader');if(r)S.blk.P[i]={r,by:S.user.name}}else F.P=+i;sv();pushB();return render()}
+const id=t.id,ar=S.lang=='ar';if(id=='em'){if(!U())return toast(ar?'الربط غير مفعّل':'Sheet link not set');fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'email'})}).catch(()=>{});return toast(ar?'تم إرسال ملف Excel للإيميل':'Excel sent to email')}
+if(id=='gs'){if(S.sheetUrl)window.open(S.sheetUrl,'_blank');else toast(ar?'الرابط غير جاهز، حدّث الصفحة':'Link not ready, refresh');return}
+if(id=='fc'){F={qr:'',L:null,P:null,s:'',e:'',stop:''};render()}if(id=='fg'){if(!F.s)F.s=nowT();F.e='';save(false)}if(id=='fd')save(true);
+if(id=='fs')scanQR();
+if(id=='bS'){if(S.user){S.user=null;sv();render()}else{$('dg').showModal()}}if(id=='bL'){S.lang=S.lang=='ar'?'en':'ar';sv();render()}if(id=='bT'){S.theme=S.theme=='dark'?'light':'dark';sv();render()}if(id=='bR'){pull(1)}
+if(id=='ex'){const a=filt(),c='Receipt,Shift,Operator,Loader,Packer,Cement,Start,End,Stoppage,Bags,Tons\n'+a.map(r=>[r.qr,r.sh,r.op,'L-'+r.L,'P-'+r.P,r.ct,f12(r.s),f12(r.e),r.stop,bags(r),tons(r)].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),l=document.createElement('a');l.href=URL.createObjectURL(new Blob(['\ufeff'+c],{type:'text/csv'}));l.download='truck-loading.csv';l.click()}});
+let role='operator';const rr=()=>{$('rO').className='bt '+(role=='operator'?'sel':'');$('rA').className='bt '+(role=='admin'?'sel':'')};
+$('rO').onclick=()=>{role='operator';rr()};$('rA').onclick=()=>{role='admin';rr()};$('dc').onclick=()=>$('dg').close();
+$('dk').onclick=()=>{const n=$('nm').value.trim();if(!n)return;S.user={name:n,role};sv();$('dg').close();render()};
+$('dg').addEventListener('toggle',()=>{});new MutationObserver(()=>{if($('dg').open){$('dt').textContent=T('si');$('dl1').textContent=T('nm');$('dl2').textContent=T('role');$('rO').textContent=T('ro');$('rA').textContent=T('ra');$('dc').textContent=T('cancel');$('dk').textContent=T('ok');rr()}}).observe($('dg'),{attributes:true});
+document.addEventListener('input',e=>{const i=e.target.id;if(i=='fq')F.qr=e.target.value;if(i=='fa'){F.s=e.target.value}if(i=='fe'){F.e=e.target.value;$('du').textContent=hms(durS(F.s,F.e))}if(i=='fz'){q=e.target.value;const c=e.target.selectionStart;render();$('fz').focus();$('fz').setSelectionRange(c,c)}if(i=='cu'){S.cfg.url=e.target.value.trim();sv();pull()}if(i=='cb'||i=='ck'){S.cfg.bags=+$('cb').value||600;S.cfg.kg=+$('ck').value||50;sv()}});
+document.addEventListener('change',e=>{if(e.target.id=='fq'&&F.qr&&!F.s){F.s=nowT();render()}});
+let dp;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('bI').hidden=false});$('bI').onclick=()=>dp&&dp.prompt();
+function ld_(u){return new Promise(r=>{const e=document.createElement('script');e.src=u;e.onload=e.onerror=r;document.head.appendChild(e)})}
+async function scanQR(){
+const ar=S.lang=='ar',ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px';
+ov.innerHTML='<video playsinline muted style="width:100%;max-width:520px;max-height:60vh;object-fit:cover;border-radius:18px;border:2px solid #0ea5e9"></video><div id="sm" style="color:#fff;font-weight:700;text-align:center">'+(ar?'جاري تجهيز الماسح...':'Preparing scanner...')+'</div><div class="row" style="max-width:520px;width:100%"><label class="gh" style="color:#fff;text-align:center;margin:0;display:block;cursor:pointer">📷 '+(ar?'التقط صورة':'Take photo')+'<input type="file" accept="image/*" capture="environment" hidden></label><button class="gh" style="color:#fff">'+T('cancel')+'</button></div>';
+document.body.appendChild(ov);const v=ov.querySelector('video'),sm=ov.querySelector('#sm'),fi=ov.querySelector('input');let st,on=true,det=null,rd=null;
+const end=()=>{on=false;st&&st.getTracks().forEach(t=>t.stop());ov.remove()};ov.querySelector('button').onclick=end;
+const done=val=>{end();F.qr=String(val).trim();F.s=nowT();render();navigator.vibrate&&navigator.vibrate(60)};
+if('BarcodeDetector' in window)try{det=new BarcodeDetector()}catch(e){}
+if(!det){await ld_('https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js');if(!window.ZXing)await ld_('https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js');
+if(window.ZXing){rd=new ZXing.MultiFormatReader();rd.setHints(new Map([[ZXing.DecodeHintType.TRY_HARDER,true]]))}}
+const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true});
+async function dec(el,w0,h0){const k=Math.min(1,1400/Math.max(w0,h0)),w=Math.round(w0*k),h=Math.round(h0*k);c.width=w;c.height=h;x.drawImage(el,0,0,w,h);
+if(det){try{const r=await det.detect(c);if(r[0])return r[0].rawValue}catch(e){}}
+const d=x.getImageData(0,0,w,h);
+if(rd){try{const l=new Uint8ClampedArray(w*h);for(let i=0,j=0;i<l.length;i++,j+=4)l[i]=(d.data[j]*77+d.data[j+1]*150+d.data[j+2]*29)>>8;return rd.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.RGBLuminanceSource(l,w,h)))).getText()}catch(e){}}
+if(window.jsQR){const r=jsQR(d.data,w,h);if(r)return r.data}return ''}
+fi.onchange=async()=>{const f=fi.files[0];if(!f)return;sm.textContent='...';const im=new Image();im.onload=async()=>{const val=await dec(im,im.naturalWidth,im.naturalHeight);if(val)done(val);else sm.textContent=ar?'ما قدرت أقرأ الصورة، قرّب وجرّب مرة ثانية':'Could not read the photo, move closer and retry'};im.src=URL.createObjectURL(f)};
+try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=st;await v.play()}catch(e){sm.textContent=(ar?'الكاميرا غير متاحة (يلزم https وإذن الكاميرا). استخدم التقاط صورة أو اكتب الرقم.':'Camera unavailable (needs https + permission). Use Take photo or type the number.');return}
+sm.textContent=ar?'وجّه الكاميرا على الباركود وثبّتها':'Point the camera at the barcode and hold steady';const t0=Date.now();
+const loop=async()=>{if(!on)return;if(v.videoWidth){const val=await dec(v,v.videoWidth,v.videoHeight);if(val)return done(val)}
+if(Date.now()-t0>8000)sm.textContent=ar?'قرّب أو ابعد قليلاً وتأكد من الإضاءة، أو استخدم التقاط صورة':'Move closer/farther, check lighting, or use Take photo';setTimeout(loop,150)};loop()}
+const U=()=>S.cfg.url||SHEET_URL;
+function push(r){if(!U())return;fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'save',rec:Object.assign({},r,{bags:bags(r),tons:tons(r),s12:f12(r.s),e12:f12(r.e)})})}).catch(()=>{})}
+function pushB(){if(!U())return;fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'blocks',blk:S.blk})}).catch(()=>{})}
+async function pull(f){if(!U())return;try{const d=await (await fetch(U())).json(),n=JSON.stringify([d.recs,d.blk]);if(!f&&n==JSON.stringify([S.recs,S.blk]))return;if(d.url)S.sheetUrl=d.url;if(d.recs)S.recs=d.recs;if(d.blk)S.blk=d.blk;sv();if(f||!(document.activeElement&&document.activeElement.tagName=='INPUT'))render()}catch(e){}}
+render();clock();setInterval(clock,1000);pull();setInterval(pull,20000);
+</script></body></html>
