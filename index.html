@@ -132,7 +132,7 @@ const id=t.id,ar=S.lang=='ar';if(id=='em'){if(!U())return toast(ar?'الربط �
 if(id=='gs'){if(S.sheetUrl)window.open(S.sheetUrl,'_blank');else toast(ar?'الرابط غير جاهز، حدّث الصفحة':'Link not ready, refresh');return}
 if(id=='fc'){F={qr:'',L:null,P:null,s:'',e:'',stop:''};render()}if(id=='fg'){if(!F.s)F.s=nowT();F.e='';save(false)}if(id=='fd')save(true);
 if(id=='fs')scanQR();
-if(id=='bS'){if(S.user){S.user=null;sv();render()}else{$('dg').showModal()}}if(id=='bL'){S.lang=S.lang=='ar'?'en':'ar';sv();render()}if(id=='bT'){S.theme=S.theme=='dark'?'light':'dark';sv();render()}if(id=='bR'){pull(1)}
+if(id=='bS'){if(S.user){S.user=null;sv();render()}else{$('dg').showModal()}}if(id=='bL'){S.lang=S.lang=='ar'?'en':'ar';sv();render()}if(id=='bT'){S.theme=S.theme=='dark'?'light':'dark';sv();render()}if(id=='bR'){sync(1)}
 if(id=='ex')exportX();});
 let role='operator';const rr=()=>{$('rO').className='bt '+(role=='operator'?'sel':'');$('rA').className='bt '+(role=='admin'?'sel':'')};
 $('rO').onclick=()=>{role='operator';rr()};$('rA').onclick=()=>{role='admin';rr()};$('dc').onclick=()=>$('dg').close();
@@ -170,8 +170,24 @@ async function exportX(){const rows=[HD].concat(filt().slice().reverse().map(xro
 try{if(!window.XLSX)await ld_('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[10,12,7,18,16,16,50,9,16,11,14,11,11,10,12,13].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Loading');XLSX.writeFile(wb,'truck-loading.xlsx');return}catch(e){}
 const c=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),l=document.createElement('a');l.href=URL.createObjectURL(new Blob(['\ufeff'+c],{type:'text/csv'}));l.download='truck-loading.csv';l.click()}
 const U=()=>S.cfg.url||SHEET_URL;
-function push(r){if(!U())return;fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'save',rec:Object.assign({},r,{bags:bags(r),tons:tons(r),s12:f12(r.s),e12:f12(r.e)})})}).catch(()=>{})}
-function pushB(){if(!U())return;fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'blocks',blk:S.blk})}).catch(()=>{})}
-async function pull(f){if(!U())return;try{const d=await (await fetch(U())).json(),n=JSON.stringify([d.recs,d.blk]);if(!f&&n==JSON.stringify([S.recs,S.blk]))return;if(d.url)S.sheetUrl=d.url;if(d.recs)S.recs=d.recs;if(d.blk)S.blk=d.blk;sv();if(f||!(document.activeElement&&document.activeElement.tagName=='INPUT'))render()}catch(e){}}
-render();clock();setInterval(clock,1000);pull();setInterval(pull,20000);
+const sj=o=>JSON.stringify(o,(k,v)=>v&&typeof v=='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,b)=>(a[b]=v[b],a),{}):v);
+S.pend=Array.isArray(S.pend)?S.pend.map(String):[];
+const pend=id=>{id=String(id);if(!S.pend.includes(id))S.pend.push(id)};
+const post=o=>fetch(U(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o)});
+let flushing=0;
+function badge(){let b=document.getElementById('sy');if(!b){b=document.createElement('div');b.id='sy';b.style.cssText='position:fixed;bottom:8px;left:8px;z-index:99;padding:4px 10px;border-radius:12px;font:600 12px system-ui;background:#f59e0b;color:#000;display:none;cursor:pointer';b.onclick=()=>sync(1);document.body.appendChild(b)}const n=S.pend.length+(S.bd?1:0);b.style.display=(n||S.err)?'block':'none';b.style.background=S.err?'#ef4444':'#f59e0b';b.textContent=S.err?'⚠ '+S.err+(n?' ('+n+')':''):'⟳ '+(S.lang=='ar'?'بانتظار المزامنة: ':'Syncing: ')+n}
+async function flush(){if(flushing||!U())return;flushing=1;try{for(const id of S.pend.slice(0,25)){const r=S.recs.find(x=>String(x.id)==id);if(!r){S.pend=S.pend.filter(x=>x!=id);continue}await post({action:'save',rec:Object.assign({},r,{bags:bags(r),tons:tons(r),s12:f12(r.s),e12:f12(r.e)})})}if(S.bd)await post({action:'blocks',blk:S.blk})}catch(e){}flushing=0;badge()}
+function push(r){pend(r.id);sv();badge();flush()}
+function pushB(){if(S.sb===undefined)return;if(sj(S.blk)==S.sb&&!S.bd)return;S.bd=1;sv();badge();flush()}
+async function pull(f){if(!U())return;try{const u=U()+(U().includes('?')?'&':'?')+'t='+Date.now(),r0=await fetch(u,{cache:'no-store'}),tx=await r0.text();let d;try{d=JSON.parse(tx)}catch(x){S.err=S.lang=='ar'?'السكربت غير منشور للجميع أو الرابط غلط':'Script not public / wrong URL';badge();return}S.err=0;if(!d||(!d.recs&&!d.blk)){S.err=S.lang=='ar'?'السكربت ما يرجّع سجلات':'Script returned no records';badge();return}const before=sj([S.recs,S.blk,S.pend,S.bd]);if(d.url)S.sheetUrl=d.url;
+if(Array.isArray(d.recs)){const sm=new Map(d.recs.map(r=>[String(r.id),r])),lc=new Map(S.recs.map(r=>[String(r.id),r]));
+S.pend=S.pend.filter(id=>{const l=lc.get(id),s=sm.get(id);return l&&!(s&&(!l.e||s.e))});
+const out=[];sm.forEach((s,id)=>out.push(S.pend.includes(id)&&lc.get(id)?lc.get(id):s));
+lc.forEach((l,id)=>{if(!sm.has(id)){out.push(l);pend(id)}});
+out.sort((a,b)=>(+b.t||+b.id||0)-(+a.t||+a.id||0));S.recs=out}
+if(d.blk){d.blk.L=d.blk.L||{};d.blk.P=d.blk.P||{};S.sb=sj(d.blk);if(S.bd){if(sj(S.blk)==S.sb)S.bd=0}else S.blk=d.blk}
+const changed=before!=sj([S.recs,S.blk,S.pend,S.bd]);sv();badge();if(!f&&!changed)return;if(f||!(document.activeElement&&document.activeElement.tagName=='INPUT'))render()}catch(e){S.err=S.lang=='ar'?'لا يوجد اتصال بالشيت':'Cannot reach Sheet';badge()}}
+async function sync(f){await flush();await pull(f)}
+window.addEventListener('online',()=>sync());document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
+render();clock();setInterval(clock,1000);badge();sync(1);setInterval(sync,15000);
 </script></body></html>
